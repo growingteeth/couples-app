@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — Playlists · Burned CDs (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <p><b>Playlists:</b> a stack of burned CDs you two make for each other. Flip through the discs, pick one, drop the needle — well, the YouTube embed.</p>
+      </div>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+      <a href="playlists.html" aria-current="page"><div class="nav-pic">💿</div><span>Playlists<br>CD Stack</span></a>
+    </nav>
+
+    <main>
+
+      <section class="window">
+        <div class="titlebar"><b><i>💿</i> cd_stack.exe — Burned CDs &amp; Playlists</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+
+          <form class="board-tools" id="plForm">
+            <h3>💿 Burn a new disc (create a playlist)</h3>
+            <div class="form-grid">
+              <div style="grid-column:span 2"><label>Playlist title (goes on the disc in Sharpie)<input id="plTitle" required placeholder="songs 4 u — summer ’03 vibes"></label></div>
+              <div><label>Made by
+                <select id="plOwner"><option value="Grey">Grey</option><option value="Partner">Partner</option><option value="Both" selected>Both</option></select></label></div>
+              <div><label>Note (optional)<input id="plNote" placeholder="for the drive, for a bad day…"></label></div>
+              <div class="full"><button class="btn primary" type="submit">Burn this disc ➤</button></div>
+            </div>
+          </form>
+
+          <div class="disc-stage">
+            <div class="disc-stack" id="discStack"></div>
+            <div class="disc-controls">
+              <button class="btn metal-round" id="discPrev" type="button" title="Previous disc">◀</button>
+              <span class="disc-counter" id="discCounter"></span>
+              <button class="btn metal-round" id="discNext" type="button" title="Next disc">▶</button>
+            </div>
+            <p class="disc-hint">Tap the top disc to flip to the next one. The big disc in front is the one selected.</p>
+            <div class="empty" id="plEmpty">No discs yet — burn the first one 💿✍️</div>
+          </div>
+
+          <div id="plDetail" hidden>
+            <div class="pl-head">
+              <div>
+                <div class="pl-title-sharpie" id="selTitle"></div>
+                <div class="pl-scribble" id="selMeta"></div>
+                <p class="pl-note" id="selNote"></p>
+              </div>
+              <button class="btn small danger" id="delPlaylist" type="button">Delete disc</button>
+            </div>
+            <p class="pl-note" style="margin-top:0">Deleting a disc deletes its track list with it — like snapping the CD. No undo.</p>
+
+            <div class="crt-bezel">
+              <div class="crt-screen">
+                <div class="crt-idle" id="playerIdle">📺 Pick a track below to play it here</div>
+                <iframe id="ytPlayer" title="YouTube player" hidden allowfullscreen referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; encrypted-media; picture-in-picture"></iframe>
+              </div>
+              <div class="crt-base"><span>◉ POWER</span><span>CH ▲▼</span><span>VOL ───●──</span><span>OUR · TV</span></div>
+            </div>
+
+            <h3 class="tracks-head">Track list ✍️</h3>
+            <div class="track-list" id="trackList"></div>
+            <div class="empty" id="noTracks">No tracks on this disc yet — add the first song below.</div>
+
+            <form class="file-form" id="trForm" style="margin-top:12px">
+              <h3 style="margin:0 0 8px;font-family:'VT323',monospace;font-size:22px">✚ Add a track to this disc</h3>
+              <div class="form-grid">
+                <div style="grid-column:span 2"><label>Song / video title<input id="trTitle" required placeholder="that one song, you know the one"></label></div>
+                <div><label>Added by
+                  <select id="trBy"><option value="Grey">Grey</option><option value="Partner">Partner</option></select></label></div>
+                <div class="full"><label>YouTube link (watch / youtu.be / shorts — or just the video ID)<input id="trUrl" required placeholder="https://www.youtube.com/watch?v=…"></label></div>
+                <div class="full"><button class="btn primary" type="submit">Write it on the disc ➤</button></div>
+              </div>
+              <p class="pl-msg" id="trMsg" hidden></p>
+            </form>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+    <p class="foot-note">Made for two • Live sync edition</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <a class="task-btn" href="playlists.html">Playlists</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+var selIdx = 0;
+var currentTrackId = null;
+
+function tracksOf(plId) {
+  return state.playlist_tracks.filter(function (t) { return t.playlist_id === plId; });
+}
+function ownerLabel(v) {
+  if (v === 'Grey') return (state.profiles.grey && state.profiles.grey.display_name) || 'Grey';
+  if (v === 'Partner') return (state.profiles.partner && state.profiles.partner.display_name) || 'Partner';
+  return v || 'Both';
+}
+function selectedPlaylist() {
+  if (!state.playlists.length) return null;
+  if (selIdx < 0) selIdx = 0;
+  if (selIdx >= state.playlists.length) selIdx = state.playlists.length - 1;
+  return state.playlists[selIdx];
+}
+function renderStack() {
+  var wrap = $('discStack'); wrap.innerHTML = '';
+  var n = state.playlists.length;
+  $('plEmpty').style.display = n ? 'none' : '';
+  state.playlists.forEach(function (pl, i) {
+    var rel = (i - selIdx + n) % n;
+    if (rel > 4) return;
+    var d = document.createElement('button');
+    d.type = 'button';
+    d.className = 'disc slot-' + rel;
+    d.setAttribute('aria-label', 'Playlist: ' + pl.title);
+    var tracks = tracksOf(pl.id).length;
+    d.innerHTML = '<span class="disc-shine"></span>' +
+      '<span class="disc-title">' + esc(pl.title) + '</span>' +
+      '<span class="disc-scribble">' + esc(ownerLabel(pl.owner)) + ' ✍️</span>' +
+      '<span class="disc-scribble small">' + tracks + (tracks === 1 ? ' track' : ' tracks') + ' • ' + fmtDate(pl.created_at) + '</span>' +
+      '<span class="disc-hole"></span>';
+    d.onclick = function () {
+      if (i === selIdx) { selIdx = (selIdx + 1) % n; }
+      else { selIdx = i; }
+      currentTrackId = null;
+      renderPlaylists();
+    };
+    wrap.appendChild(d);
+  });
+  $('discCounter').textContent = n ? ('disc ' + (selIdx + 1) + ' of ' + n) : 'no discs';
+  $('discPrev').disabled = n < 2;
+  $('discNext').disabled = n < 2;
+}
+function setPlayer(track) {
+  var frame = $('ytPlayer'), idle = $('playerIdle');
+  var url = track ? youtubeEmbedUrl(track.youtube_url) : null;
+  if (url) {
+    frame.src = url; frame.hidden = false; idle.hidden = true;
+  } else {
+    frame.removeAttribute('src'); frame.hidden = true; idle.hidden = false;
+    if (track) idle.textContent = '⚠ That link doesn\'t look like a YouTube video — use Open on YouTube instead.';
+    else idle.textContent = '📺 Pick a track below to play it here';
+  }
+}
+function renderDetail() {
+  var pl = selectedPlaylist();
+  $('plDetail').hidden = !pl;
+  if (!pl) { setPlayer(null); return; }
+  $('selTitle').textContent = pl.title;
+  $('selMeta').textContent = 'by ' + ownerLabel(pl.owner) + ' • burned ' + fmtDate(pl.created_at);
+  $('selNote').textContent = pl.note || '';
+  $('selNote').style.display = pl.note ? '' : 'none';
+  var list = $('trackList'); list.innerHTML = '';
+  var tracks = tracksOf(pl.id);
+  $('noTracks').style.display = tracks.length ? 'none' : '';
+  var stillThere = false;
+  tracks.forEach(function (t, idx) {
+    if (t.id === currentTrackId) stillThere = true;
+    var row = document.createElement('div');
+    row.className = 'track-row' + (t.id === currentTrackId ? ' playing' : '');
+    row.innerHTML = '<button class="btn metal-round small" type="button" data-play="' + t.id + '" title="Play">▶</button>' +
+      '<div class="track-main"><b>' + (idx + 1) + '. ' + esc(t.title || '(untitled)') + '</b>' +
+      '<small>added by ' + esc(ownerLabel(t.added_by)) + '</small></div>' +
+      '<a class="btn small" href="' + esc(t.youtube_url) + '" target="_blank" rel="noopener">Open on YouTube ↗</a>' +
+      '<button class="btn small danger" type="button" data-deltrack="' + t.id + '">Delete</button>';
+    list.appendChild(row);
+  });
+  if (!stillThere) currentTrackId = null;
+  list.querySelectorAll('[data-play]').forEach(function (b) {
+    b.onclick = function () {
+      var t = state.playlist_tracks.find(function (x) { return x.id === b.dataset.play; });
+      currentTrackId = t ? t.id : null;
+      setPlayer(t || null);
+      renderDetailKeepPlayer();
+    };
+  });
+  list.querySelectorAll('[data-deltrack]').forEach(function (b) {
+    b.onclick = function () {
+      armDelete(b, function () {
+        sb.from('playlist_tracks').delete().eq('id', b.dataset.deltrack).then(function (res) {
+          if (checkErr(res)) return;
+          if (b.dataset.deltrack === currentTrackId) { currentTrackId = null; setPlayer(null); }
+          fetchPlaylistTracks().then(renderPlaylists);
+          toast('Track scratched off 💿');
+        });
+      });
+    };
+  });
+  var cur = tracks.find(function (t) { return t.id === currentTrackId; });
+  if (!cur) setPlayer(null);
+}
+/* Re-render the track list highlight without resetting the iframe */
+function renderDetailKeepPlayer() {
+  var pl = selectedPlaylist(); if (!pl) return;
+  document.querySelectorAll('.track-row').forEach(function (r) { r.classList.remove('playing'); });
+  var tracks = tracksOf(pl.id);
+  var rows = document.querySelectorAll('.track-row');
+  tracks.forEach(function (t, i) { if (t.id === currentTrackId && rows[i]) rows[i].classList.add('playing'); });
+}
+function renderPlaylists() { renderStack(); renderDetail(); }
+
+$('discPrev').onclick = function () {
+  var n = state.playlists.length; if (n < 2) return;
+  selIdx = (selIdx - 1 + n) % n; currentTrackId = null; renderPlaylists();
+};
+$('discNext').onclick = function () {
+  var n = state.playlists.length; if (n < 2) return;
+  selIdx = (selIdx + 1) % n; currentTrackId = null; renderPlaylists();
+};
+$('plForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var title = $('plTitle').value.trim(); if (!title) return;
+  sb.from('playlists').insert({ title: title, owner: $('plOwner').value, note: $('plNote').value.trim() })
+    .then(function (res) {
+      if (checkErr(res)) return;
+      e.target.reset();
+      fetchPlaylists().then(function () {
+        selIdx = state.playlists.length - 1; currentTrackId = null; renderPlaylists();
+        toast('Disc burned 💿✍️');
+      });
+    });
+});
+$('trForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var pl = selectedPlaylist(); if (!pl) return;
+  var url = $('trUrl').value.trim();
+  var msg = $('trMsg');
+  if (!youtubeId(url)) {
+    msg.hidden = false;
+    msg.textContent = '⚠ That doesn\'t look like a YouTube link or video ID — paste a watch / youtu.be / shorts link.';
+    return;
+  }
+  msg.hidden = true;
+  sb.from('playlist_tracks').insert({
+    playlist_id: pl.id, title: $('trTitle').value.trim(), youtube_url: url,
+    added_by: $('trBy').value, position: tracksOf(pl.id).length
+  }).then(function (res) {
+    if (checkErr(res)) return;
+    e.target.reset();
+    fetchPlaylistTracks().then(renderPlaylists);
+    toast('Track written on the disc ✍️');
+  });
+});
+$('delPlaylist').onclick = function () {
+  var pl = selectedPlaylist(); if (!pl) return;
+  armDelete($('delPlaylist'), function () {
+    sb.from('playlists').delete().eq('id', pl.id).then(function (res) {
+      if (checkErr(res)) return;
+      currentTrackId = null; setPlayer(null);
+      Promise.all([fetchPlaylists(), fetchPlaylistTracks()]).then(function () {
+        if (selIdx >= state.playlists.length) selIdx = Math.max(0, state.playlists.length - 1);
+        renderPlaylists();
+      });
+      toast('Disc snapped 💔💿');
+    });
+  });
+};
+window.pageInit = function () {
+  var handlers = { playlists: renderPlaylists, playlist_tracks: renderPlaylists, profiles: renderPlaylists };
+  loadAll(handlers).then(function () { subscribeRealtime(handlers); });
+};
+</script>
+</body>
+</html>
