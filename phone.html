@@ -17,7 +17,7 @@
   <section class="window login-window">
     <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ Grey × Sam — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -64,7 +64,7 @@
               <div class="thread" id="thread"></div>
               <form class="phone-form" id="msgForm">
                 <label style="font-size:12px;font-weight:700">FROM
-                  <select id="msgFrom"><option value="Grey">Grey</option><option value="Partner">Partner</option></select>
+                  <select id="msgFrom"><option value="Grey">Grey</option><option value="Sam">Sam</option></select>
                 </label>
                 <textarea id="msgText" rows="2" placeholder="miss u, check this draft… (T9 vibes encouraged)" required></textarea>
                 <button class="btn primary" type="submit">SEND TXT ➤</button>
@@ -102,7 +102,7 @@ function renderSenderLabels() {
   var g = state.profiles.grey && state.profiles.grey.display_name;
   var p = state.profiles.partner && state.profiles.partner.display_name;
   sel.options[0].textContent = g || 'Grey';
-  sel.options[1].textContent = p || 'Partner';
+  sel.options[1].textContent = p || 'Sam';
 }
 function renderMessages() {
   renderSenderLabels();

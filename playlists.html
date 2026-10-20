@@ -17,7 +17,7 @@
   <section class="window login-window">
     <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ Grey × Sam — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -60,7 +60,7 @@
             <div class="form-grid">
               <div style="grid-column:span 2"><label>Playlist title (goes on the disc in Sharpie)<input id="plTitle" required placeholder="songs 4 u — summer ’03 vibes"></label></div>
               <div><label>Made by
-                <select id="plOwner"><option value="Grey">Grey</option><option value="Partner">Partner</option><option value="Both" selected>Both</option></select></label></div>
+                <select id="plOwner"><option value="Grey">Grey</option><option value="Sam">Sam</option><option value="Both" selected>Both</option></select></label></div>
               <div><label>Note (optional)<input id="plNote" placeholder="for the drive, for a bad day…"></label></div>
               <div class="full"><button class="btn primary" type="submit">Burn this disc ➤</button></div>
             </div>
@@ -105,7 +105,7 @@
               <div class="form-grid">
                 <div style="grid-column:span 2"><label>Song / video title<input id="trTitle" required placeholder="that one song, you know the one"></label></div>
                 <div><label>Added by
-                  <select id="trBy"><option value="Grey">Grey</option><option value="Partner">Partner</option></select></label></div>
+                  <select id="trBy"><option value="Grey">Grey</option><option value="Sam">Sam</option></select></label></div>
                 <div class="full"><label>YouTube link (watch / youtu.be / shorts — or just the video ID)<input id="trUrl" required placeholder="https://www.youtube.com/watch?v=…"></label></div>
                 <div class="full"><button class="btn primary" type="submit">Write it on the disc ➤</button></div>
               </div>
@@ -144,7 +144,7 @@ function tracksOf(plId) {
 }
 function ownerLabel(v) {
   if (v === 'Grey') return (state.profiles.grey && state.profiles.grey.display_name) || 'Grey';
-  if (v === 'Partner') return (state.profiles.partner && state.profiles.partner.display_name) || 'Partner';
+  if (v === 'Sam' || v === 'Partner') return (state.profiles.partner && state.profiles.partner.display_name) || 'Sam';
   return v || 'Both';
 }
 function selectedPlaylist() {
