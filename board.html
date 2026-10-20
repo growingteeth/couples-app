@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — Project Board (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <p><b>Project board:</b> every card, in its column. Click a card title to open that project's own page.</p>
+      </div>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
+      <a href="board.html" aria-current="page"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+    </nav>
+
+    <main>
+
+      <section class="window">
+        <div class="titlebar"><b><i>▦</i> projects.doc — Our Trello Board</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <div class="board-tools">
+            <h3 id="formTitle">+ Add a project card</h3>
+            <form id="cardForm">
+              <input type="hidden" id="cardId">
+              <div class="form-grid">
+                <div><label>Title *</label><input id="cTitle" required placeholder="e.g. Zine layout draft"></div>
+                <div><label>Owner</label><select id="cOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
+                <div><label>Tag</label><select id="cTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
+                <div><label>Due date</label><input type="date" id="cDue"></div>
+                <div><label>Column</label><select id="cCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
+                <div style="grid-column:span 3"><label>Notes</label><input id="cNotes" placeholder="One-line context, links, next step…"></div>
+                <div class="full"><label>Checklist — one item per line</label><textarea id="cCheck" rows="2" placeholder="Draft outline&#10;Share for feedback&#10;Final export"></textarea></div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="btn primary" type="submit">Save card</button><button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button></div>
+            </form>
+          </div>
+          <div class="board" id="board"></div>
+        </div>
+      </section>
+
+    </main>
+    <p class="foot-note">Made for two • Live sync edition</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+function cardHtml(p) {
+  var checks = checklistOf(p);
+  return '<article class="card"><h5><a href="project.html?id=' + encodeURIComponent(p.id) + '">' + esc(p.title) + '</a></h5>' +
+    '<div class="meta"><span class="pill owner">' + esc(p.owner || 'Both') + '</span>' +
+    (p.tag ? '<span class="pill tag">' + esc(p.tag) + '</span>' : '') +
+    (p.due_date ? '<span class="pill due">Due ' + esc(p.due_date) + '</span>' : '') + '</div>' +
+    (p.notes ? '<p>' + esc(p.notes) + '</p>' : '') +
+    (checks.length ? '<ul class="check">' + checks.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>' : '') +
+    '<div class="card-actions">' +
+    '<button class="btn small" data-move="' + p.id + '|-1">◀ Move</button>' +
+    '<button class="btn small" data-move="' + p.id + '|1">Move ▶</button>' +
+    '<button class="btn small" data-edit="' + p.id + '">Edit</button>' +
+    '<a class="btn small" href="project.html?id=' + encodeURIComponent(p.id) + '">Page</a>' +
+    '<button class="btn small danger" data-del="' + p.id + '">Delete</button></div></article>';
+}
+function renderBoard() {
+  var board = $('board');
+  board.innerHTML = '';
+  COLS.forEach(function (col) {
+    var items = state.projects.filter(function (p) { return p.column_status === col; });
+    var div = document.createElement('div');
+    div.className = 'col';
+    var html = '<h4>' + esc(col) + ' <span>' + items.length + '</span></h4>';
+    if (!items.length) html += '<div class="empty">No cards yet.<br>Add one above ↑</div>';
+    items.forEach(function (p) { html += cardHtml(p); });
+    div.innerHTML = html;
+    board.appendChild(div);
+  });
+  board.querySelectorAll('[data-move]').forEach(function (b) { b.onclick = function () {
+    var parts = b.dataset.move.split('|');
+    var id = parts[0], dir = parseInt(parts[1], 10);
+    var p = state.projects.find(function (x) { return x.id === id; });
+    if (!p) return;
+    var n = COLS.indexOf(p.column_status) + dir;
+    if (n < 0 || n >= COLS.length) return;
+    var pos = state.projects.filter(function (x) { return x.column_status === COLS[n]; }).length;
+    sb.from('projects').update({ column_status: COLS[n], position: pos, updated_at: new Date().toISOString() }).eq('id', id)
+      .then(function (res) { if (!checkErr(res)) { fetchProjects().then(renderBoard); toast('Moved to ' + COLS[n]); } });
+  }; });
+  board.querySelectorAll('[data-del]').forEach(function (b) { b.onclick = function () {
+    armDelete(b, function () {
+      sb.from('projects').delete().eq('id', b.dataset.del).then(function (res) {
+        if (!checkErr(res)) { fetchProjects().then(renderBoard); toast('Card deleted'); }
+      });
+    });
+  }; });
+  board.querySelectorAll('[data-edit]').forEach(function (b) { b.onclick = function () {
+    var p = state.projects.find(function (x) { return x.id === b.dataset.edit; });
+    if (!p) return;
+    $('cardId').value = p.id; $('cTitle').value = p.title || ''; $('cOwner').value = p.owner || 'Both';
+    if (p.tag) $('cTag').value = p.tag;
+    $('cDue').value = p.due_date || ''; $('cCol').value = p.column_status || 'Ideas';
+    $('cNotes').value = p.notes || ''; $('cCheck').value = checklistOf(p).join('\n');
+    $('formTitle').textContent = '✎ Edit card'; $('cancelEdit').hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }; });
+}
+$('cardForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var title = $('cTitle').value.trim(); if (!title) return;
+  var col = $('cCol').value;
+  var row = {
+    title: title, owner: $('cOwner').value, tag: $('cTag').value,
+    due_date: $('cDue').value || null, column_status: col,
+    notes: $('cNotes').value.trim(),
+    checklist: $('cCheck').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
+    updated_at: new Date().toISOString()
+  };
+  var id = $('cardId').value;
+  var req = id ? sb.from('projects').update(row).eq('id', id)
+               : sb.from('projects').insert(Object.assign(row, { position: state.projects.filter(function (x) { return x.column_status === col; }).length }));
+  req.then(function (res) {
+    if (checkErr(res)) return;
+    e.target.reset(); $('cardId').value = '';
+    $('formTitle').textContent = '+ Add a project card'; $('cancelEdit').hidden = true;
+    fetchProjects().then(renderBoard); toast(id ? 'Card updated ✓' : 'Card added ✓');
+  });
+});
+$('cancelEdit').onclick = function () {
+  $('cardForm').reset(); $('cardId').value = '';
+  $('formTitle').textContent = '+ Add a project card'; this.hidden = true;
+};
+window.pageInit = function () {
+  var handlers = { projects: renderBoard };
+  loadAll(handlers).then(function () { subscribeRealtime(handlers); });
+};
+</script>
+</body>
+</html>

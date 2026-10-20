@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Project — Our Desktop (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <p><b>Project page:</b> one project, all its details, and its own file shelf.</p>
+      </div>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+    </nav>
+
+    <main>
+
+      <div class="notfound" id="notFound" hidden></div>
+      <div id="projectContent" hidden>
+      <section class="window">
+        <div class="titlebar"><b><i>▦</i> <span id="projTitleBar">project</span></b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <p style="margin:0 0 8px"><a href="index.html">← Back to directory</a> • <a href="board.html">Board</a></p>
+          <div id="cardPreview"></div>
+          <div class="board-tools">
+            <h3>✎ Project details</h3>
+            <form id="projForm">
+              <div class="form-grid">
+                <div><label>Title *</label><input id="dTitle" required></div>
+                <div><label>Owner</label><select id="dOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
+                <div><label>Tag</label><select id="dTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
+                <div><label>Due date</label><input type="date" id="dDue"></div>
+                <div><label>Status / column</label><select id="dCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
+                <div style="grid-column:span 3"><label>Notes</label><input id="dNotes"></div>
+                <div class="full"><label>Checklist — one item per line</label><textarea id="dCheck" rows="4"></textarea></div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+                <button class="btn primary" type="submit">Save changes</button>
+                <button class="btn" type="button" id="movePrev">◀ Move back a column</button>
+                <button class="btn" type="button" id="moveNext">Move forward a column ▶</button>
+                <button class="btn danger" type="button" id="delProject">Delete project</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="window">
+        <div class="titlebar"><b><i>🗀</i> <span id="shelfTitle">files — this project's shelf</span></b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <p class="share-note">This shelf shows <b>only this project's files</b>. Upload the real file (doc, JPG, PDF…) or add a name + link if it lives somewhere else.</p>
+          <form class="file-form" id="fileForm">
+            <div class="form-grid">
+              <div><label>File name</label><input id="fName" placeholder="cover-draft-v2.jpg"></div>
+              <div><label>Type</label><select id="fType"><option value="jpg">JPG</option><option value="png">PNG</option><option value="pdf">PDF</option><option value="doc">DOC</option><option value="txt">TXT</option><option value="other">Other</option></select></div>
+              <div><label>Upload a file (optional)</label><input id="fUpload" type="file"></div>
+              <div><label>Link (optional)</label><input id="fUrl" placeholder="https://…"></div>
+              <div class="full"><label>Note</label><input id="fNote" placeholder="What is this? Which version?"></div>
+            </div>
+            <button class="btn primary" style="margin-top:8px" type="submit" id="fileSubmit">Add to this shelf</button>
+          </form>
+          <div class="file-list" id="fileList"></div>
+        </div>
+      </section>
+      </div>
+
+    </main>
+    <p class="foot-note">Made for two • Live sync edition</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+var projectId = new URLSearchParams(location.search).get('id');
+var project = null;
+
+function showNotFound(msg) {
+  var nf = $('notFound');
+  nf.hidden = false;
+  nf.innerHTML = esc(msg) + '<br><br><a class="btn" href="index.html">← Go to the directory</a>';
+  $('projectContent').hidden = true;
+}
+function currentProjectFiles() {
+  return state.files.filter(function (f) { return f.project_id === projectId; });
+}
+function renderProject() {
+  if (!project) return;
+  document.title = project.title + ' — Our Desktop';
+  $('projTitleBar').textContent = 'project — ' + project.title;
+  $('shelfTitle').textContent = 'files — ' + project.title + "'s shelf";
+  if (document.activeElement !== $('dTitle')) {
+    $('dTitle').value = project.title || ''; $('dOwner').value = project.owner || 'Both';
+    if (project.tag) $('dTag').value = project.tag;
+    $('dDue').value = project.due_date || ''; $('dCol').value = project.column_status || 'Ideas';
+    $('dNotes').value = project.notes || ''; $('dCheck').value = checklistOf(project).join('\n');
+  }
+  var checks = checklistOf(project);
+  $('cardPreview').innerHTML = '<article class="card"><h5>' + esc(project.title) + '</h5>' +
+    '<div class="meta"><span class="pill owner">' + esc(project.owner || 'Both') + '</span>' +
+    '<span class="pill status">' + esc(project.column_status || 'Ideas') + '</span>' +
+    (project.tag ? '<span class="pill tag">' + esc(project.tag) + '</span>' : '') +
+    (project.due_date ? '<span class="pill due">Due ' + esc(project.due_date) + '</span>' : '') + '</div>' +
+    (project.notes ? '<p>' + esc(project.notes) + '</p>' : '') +
+    (checks.length ? '<ul class="check">' + checks.map(function (c) { return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>' : '') + '</article>';
+}
+function renderProjectFiles() {
+  var list = $('fileList');
+  var items = currentProjectFiles();
+  if (!items.length) { list.innerHTML = '<div class="empty">Nothing on this shelf yet — add a file above.</div>'; return; }
+  list.innerHTML = '';
+  items.forEach(function (f) {
+    var div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = fileRowHtml(f, { showProject: false });
+    list.appendChild(div);
+  });
+  wireFileRowActions(list, state.files, function () { fetchFiles().then(renderProjectFiles); });
+  fillThumbs(list, items);
+}
+function refreshProject() {
+  if (!projectId) return;
+  sb.from('projects').select('*').eq('id', projectId).single().then(function (res) {
+    if (res.error || !res.data) { showNotFound('That project could not be found — it may have been deleted.'); return; }
+    project = res.data;
+    $('projectContent').hidden = false;
+    renderProject();
+  });
+}
+function moveBy(dir) {
+  if (!project) return;
+  var n = COLS.indexOf(project.column_status) + dir;
+  if (n < 0 || n >= COLS.length) { toast('Already at the ' + (dir < 0 ? 'first' : 'last') + ' column'); return; }
+  sb.from('projects').update({ column_status: COLS[n], updated_at: new Date().toISOString() }).eq('id', projectId)
+    .then(function (res) { if (!checkErr(res)) { toast('Moved to ' + COLS[n]); refreshProject(); } });
+}
+$('projForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var row = {
+    title: $('dTitle').value.trim(), owner: $('dOwner').value, tag: $('dTag').value,
+    due_date: $('dDue').value || null, column_status: $('dCol').value,
+    notes: $('dNotes').value.trim(),
+    checklist: $('dCheck').value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean),
+    updated_at: new Date().toISOString()
+  };
+  if (!row.title) return;
+  sb.from('projects').update(row).eq('id', projectId).then(function (res) {
+    if (checkErr(res)) return;
+    toast('Project saved ✓'); refreshProject();
+  });
+});
+$('movePrev').onclick = function () { moveBy(-1); };
+$('moveNext').onclick = function () { moveBy(1); };
+$('delProject').onclick = function () {
+  armDelete(this, function () {
+    sb.from('projects').delete().eq('id', projectId).then(function (res) {
+      if (checkErr(res)) return;
+      toast('Project deleted');
+      location.href = 'index.html';
+    });
+  });
+};
+$('fileForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var btn = $('fileSubmit'); btn.disabled = true; btn.textContent = 'Adding…';
+  addFileEntry({
+    name: $('fName').value, type: $('fType').value, projectId: projectId,
+    note: $('fNote').value, link: $('fUrl').value, fileInput: $('fUpload')
+  }, function (ok) {
+    btn.disabled = false; btn.textContent = 'Add to this shelf';
+    if (ok) { e.target.reset(); fetchFiles().then(renderProjectFiles); toast('Added to this shelf 🗂️'); }
+  });
+});
+window.pageInit = function () {
+  if (!projectId) { showNotFound('No project was picked — this page needs a project link from the directory or the board.'); setLive(true); return; }
+  refreshProject();
+  fetchFiles().then(renderProjectFiles);
+  var handlers = {
+    projects: function () { refreshProject(); },
+    files: renderProjectFiles
+  };
+  subscribeRealtime(handlers);
+};
+</script>
+</body>
+</html>

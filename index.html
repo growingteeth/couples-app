@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — Directory (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices — move a card or leave a note and it shows up on the other side.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <p><b>Directory:</b> your profiles, and every project in one list. Click a project to open its own page — its details, checklist and private file shelf live there.</p>
+      </div>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html" aria-current="page"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+    </nav>
+
+    <main>
+      <!-- PROFILES -->
+      <section class="window">
+        <div class="titlebar"><b><i>♡</i> profiles.htm — MySpace</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <div class="profiles-grid">
+            <article class="profile">
+              <div class="profile-head"><div class="avatar grey" data-avatar="grey">G</div><div><strong style="font-size:18px" data-pname="grey">Grey</strong><div style="font-size:12px;color:#555">Las Vegas • Writer &amp; Artist</div><div style="font-size:12px">★ Top 8 forever</div></div></div>
+              <label>Display name</label><input data-profile="grey" data-field="display_name">
+              <label>Mood / status</label><input data-profile="grey" data-field="mood">
+              <label>Currently working on</label><input data-profile="grey" data-field="working_on">
+              <label>Favourite song</label><input data-profile="grey" data-field="fav_song">
+              <label>Avatar image URL (optional)</label><input data-profile="grey" data-field="avatar_url" placeholder="https://…">
+              <div class="mood" data-mood-preview="grey">Mood: —</div>
+            </article>
+            <article class="profile">
+              <div class="profile-head"><div class="avatar partner" data-avatar="partner">P</div><div><strong style="font-size:18px" data-pname="partner">Partner</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
+              <label>Display name</label><input data-profile="partner" data-field="display_name">
+              <label>Mood / status</label><input data-profile="partner" data-field="mood">
+              <label>Currently working on</label><input data-profile="partner" data-field="working_on">
+              <label>Favourite song</label><input data-profile="partner" data-field="fav_song">
+              <label>Avatar image URL (optional)</label><input data-profile="partner" data-field="avatar_url" placeholder="https://…">
+              <div class="mood" data-mood-preview="partner">Mood: —</div>
+            </article>
+          </div>
+          <div class="friends">
+            <h3>Grey's Top Friends</h3>
+            <div class="friend-row">
+              <div class="friend"><div class="friend-face" style="background:#111">🐾</div><b>Pancake</b><small>4 • black shorthair<br>Chief supervisor</small></div>
+              <div class="friend"><div class="friend-face" style="background:#b45309">🐾</div><b>Kyoko</b><small>11 • calico Scottish Fold<br>Senior editor</small></div>
+              <div class="friend"><div class="friend-face" style="background:#be185d">🐾</div><b>Coffee</b><small>1 • calico shorthair<br>Chaos intern</small></div>
+              <div class="friend"><div class="friend-face" style="background:#000080">♥</div><b>You Two</b><small>Grey × Partner<br>The main characters</small></div>
+            </div>
+            <p style="margin:8px 0 0;font-size:12px;color:#555">Profile edits save to the shared account and appear on your partner's screen live.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- DIRECTORY -->
+      <section class="window">
+        <div class="titlebar"><b><i>🗀</i> directory — All Projects</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <div class="board-tools">
+            <h3>+ Add a project</h3>
+            <form id="addProjectForm">
+              <div class="form-grid">
+                <div><label>Title *</label><input id="pTitle" required placeholder="e.g. Las Vegas art magazine"></div>
+                <div><label>Owner</label><select id="pOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
+                <div><label>Tag</label><select id="pTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
+                <div><label>Due date</label><input type="date" id="pDue"></div>
+                <div><label>Starts in</label><select id="pCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
+                <div style="grid-column:span 3"><label>Notes</label><input id="pNotes" placeholder="One-line context, links, next step…"></div>
+              </div>
+              <button class="btn primary" type="submit" style="margin-top:8px">Add project</button>
+            </form>
+          </div>
+          <div class="dir-grid" id="directory"></div>
+        </div>
+      </section>
+    </main>
+    <p class="foot-note">Made for two • Live sync edition • Directory</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+function renderProfiles() {
+  ['grey', 'partner'].forEach(function (k) {
+    var p = state.profiles[k] || {};
+    document.querySelectorAll('[data-profile="' + k + '"]').forEach(function (inp) {
+      if (document.activeElement !== inp) inp.value = p[inp.dataset.field] || '';
+    });
+    var prev = document.querySelector('[data-mood-preview="' + k + '"]');
+    if (prev) prev.textContent = 'Mood: ' + (p.mood || '—');
+    var nm = document.querySelector('[data-pname="' + k + '"]');
+    if (nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Partner');
+    var av = document.querySelector('[data-avatar="' + k + '"]');
+    if (av) {
+      if (p.avatar_url) { av.innerHTML = '<img src="' + esc(p.avatar_url) + '" alt="">'; }
+      else { av.textContent = (p.display_name || k).trim().charAt(0).toUpperCase() || '?'; }
+    }
+  });
+}
+function renderDirectory() {
+  var wrap = $('directory');
+  if (!state.projects.length) {
+    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1">No projects yet — add your first one above.</div>';
+    return;
+  }
+  wrap.innerHTML = state.projects.map(function (p) {
+    var nFiles = state.files.filter(function (f) { return f.project_id === p.id; }).length;
+    var checks = checklistOf(p);
+    return '<article class="dir-card"><h3><a href="project.html?id=' + encodeURIComponent(p.id) + '">' + esc(p.title) + '</a></h3>' +
+      '<div class="meta"><span class="pill owner">' + esc(p.owner || 'Both') + '</span>' +
+      '<span class="pill status">' + esc(p.column_status || 'Ideas') + '</span>' +
+      (p.tag ? '<span class="pill tag">' + esc(p.tag) + '</span>' : '') +
+      (p.due_date ? '<span class="pill due">Due ' + esc(p.due_date) + '</span>' : '') + '</div>' +
+      (p.notes ? '<p style="margin:5px 0;font-size:13px">' + esc(p.notes) + '</p>' : '') +
+      '<div class="counts">🗂️ ' + nFiles + ' file' + (nFiles === 1 ? '' : 's') + ' on its shelf' +
+      (checks.length ? ' • ☑ ' + checks.length + ' checklist item' + (checks.length === 1 ? '' : 's') : '') +
+      '<br>Updated ' + (p.updated_at ? fmtDate(p.updated_at) : '—') + '</div>' +
+      '<div class="card-actions"><a class="btn small" href="project.html?id=' + encodeURIComponent(p.id) + '">Open project page ➤</a></div></article>';
+  }).join('');
+}
+function renderAll() { renderProfiles(); renderDirectory(); }
+
+var profileTimers = {};
+document.querySelectorAll('[data-profile]').forEach(function (inp) {
+  inp.addEventListener('input', function () {
+    var key = inp.dataset.profile, field = inp.dataset.field, val = inp.value;
+    if (!state.profiles[key]) state.profiles[key] = { id: key };
+    state.profiles[key][field] = val;
+    var prev = document.querySelector('[data-mood-preview="' + key + '"]');
+    if (field === 'mood' && prev) prev.textContent = 'Mood: ' + (val || '—');
+    clearTimeout(profileTimers[key + field]);
+    profileTimers[key + field] = setTimeout(function () {
+      var upd = { updated_at: new Date().toISOString() };
+      upd[field] = val;
+      sb.from('profiles').update(upd).eq('id', key).then(function (res) { if (!checkErr(res)) showSyncError(false); });
+    }, 700);
+  });
+});
+
+$('addProjectForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var title = $('pTitle').value.trim();
+  if (!title) return;
+  var col = $('pCol').value;
+  var row = {
+    title: title, owner: $('pOwner').value, tag: $('pTag').value,
+    due_date: $('pDue').value || null, column_status: col,
+    notes: $('pNotes').value.trim(), checklist: [],
+    position: state.projects.filter(function (x) { return x.column_status === col; }).length,
+    updated_at: new Date().toISOString()
+  };
+  sb.from('projects').insert(row).then(function (res) {
+    if (checkErr(res)) return;
+    e.target.reset();
+    Promise.all([fetchProjects(), fetchFiles()]).then(renderAll);
+    toast('Project added ✓ — open it from the directory');
+  });
+});
+
+window.pageInit = function () {
+  var handlers = { profiles: renderProfiles, projects: renderDirectory, files: renderDirectory };
+  loadAll(handlers).then(function () { subscribeRealtime(handlers); });
+};
+</script>
+</body>
+</html>

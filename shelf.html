@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — File Shelf (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <p><b>File shelf:</b> every shared file in one place — filter by type or project, or search by name.</p>
+      </div>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
+      <a href="shelf.html" aria-current="page"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+    </nav>
+
+    <main>
+
+      <section class="window">
+        <div class="titlebar"><b><i>🗀</i> files — The Whole File Shelf</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <p class="share-note">Every file either of you has shelved, across all projects. Looking for one project's files only? Open that project from the <a href="index.html">directory</a> — it has its own shelf.</p>
+          <form class="file-form" id="fileForm">
+            <div class="form-grid">
+              <div><label>File name</label><input id="fName" placeholder="cover-draft-v2.jpg"></div>
+              <div><label>Type</label><select id="fType"><option value="jpg">JPG</option><option value="png">PNG</option><option value="pdf">PDF</option><option value="doc">DOC</option><option value="txt">TXT</option><option value="other">Other</option></select></div>
+              <div><label>Project</label><select id="fProject"></select></div>
+              <div><label>Upload a file (optional)</label><input id="fUpload" type="file"></div>
+              <div><label>Link (optional)</label><input id="fUrl" placeholder="https://…"></div>
+              <div style="grid-column:span 3"><label>Note</label><input id="fNote" placeholder="What is this? Which version?"></div>
+            </div>
+            <button class="btn primary" style="margin-top:8px" type="submit" id="fileSubmit">Add to shelf</button>
+          </form>
+          <div class="toolbar">
+            <label><b>Type:</b> <select id="typeFilter"><option value="">All types</option><option value="doc">DOC / TXT</option><option value="jpg">JPG</option><option value="pdf">PDF</option><option value="other">Other</option></select></label>
+            <label><b>Project:</b> <select id="projFilter"><option value="">All projects</option></select></label>
+            <label><b>Search:</b> <input id="searchBox" type="search" placeholder="file name…"></label>
+            <span id="fileCount" style="font-size:12px;color:#555"></span>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+      </section>
+
+    </main>
+    <p class="foot-note">Made for two • Live sync edition</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+function typeMatches(f, want) {
+  var t = String(f.file_type || 'other').toLowerCase();
+  if (!want) return true;
+  if (want === 'doc') return t === 'doc' || t === 'txt';
+  if (want === 'jpg') return t === 'jpg' || t === 'png';
+  if (want === 'pdf') return t === 'pdf';
+  return ['doc', 'txt', 'jpg', 'png', 'pdf'].indexOf(t) < 0;
+}
+function filteredFiles() {
+  var wantType = $('typeFilter').value;
+  var wantProj = $('projFilter').value;
+  var q = $('searchBox').value.trim().toLowerCase();
+  return state.files.filter(function (f) {
+    if (!typeMatches(f, wantType)) return false;
+    if (wantProj === '__general' && f.project_id) return false;
+    if (wantProj && wantProj !== '__general' && f.project_id !== wantProj) return false;
+    if (q && String(f.name || '').toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+function renderProjectPickers() {
+  var sel = $('fProject'), filt = $('projFilter');
+  var cur = sel.value, curF = filt.value;
+  var opts = state.projects.map(function (p) { return '<option value="' + p.id + '">' + esc(p.title) + '</option>'; }).join('');
+  sel.innerHTML = '<option value="">General (no project)</option>' + opts;
+  if (cur) sel.value = cur;
+  filt.innerHTML = '<option value="">All projects</option><option value="__general">General</option>' + opts;
+  if (curF) filt.value = curF;
+}
+function renderFiles() {
+  renderProjectPickers();
+  var list = $('fileList');
+  var items = filteredFiles();
+  $('fileCount').textContent = items.length + ' file' + (items.length === 1 ? '' : 's') + ' shown';
+  if (!items.length) { list.innerHTML = '<div class="empty">Nothing matches — add a file above, or loosen the filters.</div>'; return; }
+  list.innerHTML = '';
+  items.forEach(function (f) {
+    var div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = fileRowHtml(f, { showProject: true });
+    list.appendChild(div);
+  });
+  wireFileRowActions(list, state.files, function () { fetchFiles().then(renderFiles); });
+  fillThumbs(list, items);
+}
+$('fileForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var btn = $('fileSubmit'); btn.disabled = true; btn.textContent = 'Adding…';
+  addFileEntry({
+    name: $('fName').value, type: $('fType').value, projectId: $('fProject').value || null,
+    note: $('fNote').value, link: $('fUrl').value, fileInput: $('fUpload')
+  }, function (ok) {
+    btn.disabled = false; btn.textContent = 'Add to shelf';
+    if (ok) { e.target.reset(); fetchFiles().then(renderFiles); toast('Added to file shelf 🗂️'); }
+  });
+});
+['typeFilter', 'projFilter'].forEach(function (id) { $(id).addEventListener('change', renderFiles); });
+$('searchBox').addEventListener('input', renderFiles);
+window.pageInit = function () {
+  var handlers = { files: renderFiles, projects: renderProjectPickers };
+  loadAll(handlers).then(function () { subscribeRealtime(handlers); });
+};
+</script>
+</body>
+</html>
