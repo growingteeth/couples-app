@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — Live Sync</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --teal:#008080; --face:#c3c7cb; --face-light:#ece9d8; --face2:#d4d0c8;
+  --navy:#000080; --ink:#111; --lcd:#c8d99a;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:Tahoma,Verdana,Arial,sans-serif;background:var(--teal);color:var(--ink);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+
+/* DESKTOP */
+.desktop{min-height:100vh;padding:14px 14px 64px;background:
+  radial-gradient(600px 200px at 15% 0%, rgba(255,255,255,.14), transparent 60%),
+  linear-gradient(180deg,#009090,#007a7a 55%,#006666)}
+.top-banner{max-width:1240px;margin:0 auto 12px;background:#ffffcc;border:2px solid #000;box-shadow:4px 4px 0 rgba(0,0,0,.35);padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.top-banner strong{font-family:"VT323",monospace;font-size:22px;letter-spacing:.3px}
+.top-banner p{margin:2px 0 0;font-size:13px;max-width:720px}
+.top-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btn{border:2px solid;border-color:#fff #404040 #404040 #fff;background:var(--face);padding:6px 10px;font-weight:700;box-shadow:inset 1px 1px #dfdfdf}
+.btn:active{border-color:#404040 #fff #fff #404040}
+.btn.primary{background:#000080;color:#fff;border-color:#5a7cff #000040 #000040 #5a7cff}
+.btn.small{padding:3px 7px;font-size:12px}
+.btn.danger{background:#ffe1e1}
+.sync-pill{font-family:"VT323",monospace;font-size:18px;padding:2px 10px;border:2px solid #000;background:#d1fae5}
+.sync-pill.off{background:#fee2e2}
+.sync-pill.connecting{background:#fef9c3}
+.error-banner{max-width:1240px;margin:0 auto 12px;background:#fee2e2;border:2px solid #7f1d1d;color:#7f1d1d;padding:10px 12px;font-weight:700;box-shadow:4px 4px 0 rgba(0,0,0,.35)}
+
+.icons{max-width:1240px;margin:0 auto 14px;display:flex;gap:10px;flex-wrap:wrap}
+.icon-btn{width:86px;background:transparent;border:1px dotted transparent;color:#fff;text-align:center;padding:6px 4px}
+.icon-btn:hover,.icon-btn:focus{border-color:#fff;background:rgba(255,255,255,.15)}
+.icon-pic{width:42px;height:42px;margin:0 auto 4px;background:var(--face-light);border:2px solid #111;display:grid;place-items:center;font-size:22px;box-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.icon-btn span{display:block;font-size:12px;text-shadow:1px 1px 0 #000;font-weight:700;line-height:1.2}
+
+.windows{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+.window{background:var(--face);border:2px solid;border-color:#dfdfdf #000 #000 #dfdfdf;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+.window.wide{grid-column:1/-1}
+.titlebar{background:linear-gradient(90deg,var(--navy),#1084d0);color:#fff;padding:5px 6px 5px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none}
+.titlebar b{font-size:13px;letter-spacing:.2px;display:flex;gap:7px;align-items:center}
+.titlebar b i{font-style:normal;background:#fff;color:#000080;width:18px;height:18px;display:grid;place-items:center;font-size:12px;border:1px solid #000}
+.win-btns{display:flex;gap:2px}
+.win-btns button{width:22px;height:20px;line-height:1;border:1px solid;border-color:#fff #404040 #404040 #fff;background:var(--face);font-weight:900;font-size:12px;padding:0}
+.win-body{padding:12px;background:var(--face-light)}
+.win-body.hidden{display:none}
+.window.closed{display:none}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:16px 16px 64px;background:
+  radial-gradient(600px 200px at 15% 0%, rgba(255,255,255,.14), transparent 60%),
+  linear-gradient(180deg,#009090,#007a7a 55%,#006666)}
+.login-window{width:min(400px,100%)}
+.login-window .win-body form{display:grid;gap:8px}
+.login-window label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#444}
+.login-window input{width:100%;padding:8px;border:2px inset #ddd;background:#fff;margin-top:2px}
+.login-err{background:#fee2e2;border:2px solid #7f1d1d;color:#7f1d1d;padding:8px 10px;font-weight:700;font-size:13px}
+.login-note{font-size:12px;color:#333;margin:0}
+
+/* PROFILES */
+.profiles-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.profile{background:#fff;border:2px inset #fff;box-shadow:inset 0 0 0 1px #888;padding:12px}
+.profile-head{display:flex;gap:12px;align-items:center}
+.avatar{width:64px;height:64px;flex:0 0 64px;border:2px solid #000;display:grid;place-items:center;font-family:"VT323",monospace;font-size:32px;color:#fff;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar.grey{background:#0f766e}.avatar.partner{background:#b45309}
+.profile label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#555;display:block;margin-top:8px}
+.profile input{width:100%;padding:6px;border:2px inset #eee;background:#fff}
+.mood{font-size:13px;background:#eef6ff;border:1px dashed #7aa7d9;padding:6px;margin-top:8px}
+.friends{margin-top:12px;background:#fff;border:2px inset #fff;padding:10px}
+.friends h3{margin:0 0 8px;font-family:"VT323",monospace;font-size:20px}
+.friend-row{display:flex;gap:10px;flex-wrap:wrap}
+.friend{width:92px;text-align:center}
+.friend-face{width:56px;height:56px;margin:0 auto;border-radius:50%;border:2px solid #111;display:grid;place-items:center;font-weight:900;color:#fff}
+.friend small{display:block;color:#555}
+
+/* BOARD */
+.board-tools{background:#fff;border:2px inset #fff;padding:10px;margin-bottom:12px}
+.board-tools h3{margin:0 0 8px;font-family:"VT323",monospace;font-size:22px}
+.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.form-grid .full{grid-column:1/-1}
+.form-grid label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#444}
+.form-grid input,.form-grid select,.form-grid textarea{width:100%;padding:6px;border:2px inset #ddd;background:#fff;margin-top:2px}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.col{background:#d4d0c8;border:2px solid;border-color:#fff #555 #555 #fff;padding:8px;min-height:180px}
+.col h4{margin:0 0 8px;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.col h4 span{background:#000080;color:#fff;padding:1px 6px;font-size:11px}
+.card{background:#fff;border:1px solid #777;box-shadow:2px 2px 0 rgba(0,0,0,.18);padding:8px;margin-bottom:8px}
+.card h5{margin:0 0 4px;font-size:14px}
+.meta{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0}
+.pill{font-size:11px;font-weight:700;padding:2px 6px;border:1px solid #111}
+.pill.owner{background:#fef3c7}.pill.tag{background:#dbeafe}.pill.due{background:#fee2e2}
+.card p{margin:5px 0;font-size:13px;white-space:pre-wrap}
+.check{margin:6px 0 0;padding-left:16px;font-size:13px}
+.card-actions{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.empty{font-size:12px;color:#555;border:1px dashed #888;padding:8px;text-align:center;background:rgba(255,255,255,.6)}
+
+/* PHONE */
+.phone-wrap{display:flex;justify-content:center}
+.phone{width:320px;max-width:100%;background:#1f2937;border-radius:28px 28px 36px 36px;padding:14px 14px 18px;box-shadow:inset 0 0 0 3px #4b5563, 4px 6px 0 rgba(0,0,0,.35);color:#111}
+.speaker{width:72px;height:6px;background:#111;border-radius:99px;margin:0 auto 10px}
+.screen{background:var(--lcd);border:3px solid #111;border-radius:6px;padding:10px;min-height:340px;display:flex;flex-direction:column}
+.screen-head{font-family:"VT323",monospace;font-size:20px;display:flex;justify-content:space-between;border-bottom:2px solid #5a7247;padding-bottom:4px}
+.thread{flex:1;overflow:auto;padding:8px 0;display:flex;flex-direction:column;gap:7px;max-height:330px}
+.msg{max-width:88%;padding:6px 8px;border:2px solid #2f4420;font-size:13px;line-height:1.35}
+.msg.from-grey{align-self:flex-start;background:#fff}
+.msg.from-partner{align-self:flex-end;background:#fef9c3}
+.msg.unread{outline:3px solid #dc2626;outline-offset:1px}
+.msg small{display:block;margin-top:3px;font-size:11px;color:#374151}
+.new-badge{background:#dc2626;color:#fff;font-size:10px;padding:1px 4px;font-weight:900;margin-left:4px}
+.phone-form{background:#e8f0d0;border-top:2px solid #5a7247;padding-top:8px;display:grid;gap:6px}
+.phone-form select,.phone-form textarea{width:100%;border:2px solid #334155;padding:6px;background:#fff}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.keys div{background:#374151;color:#e5e7eb;text-align:center;padding:7px 0;border-radius:99px;font-family:"VT323",monospace;font-size:16px;border:1px solid #9ca3af}
+
+/* FILES */
+.file-form{background:#fff;border:2px inset #fff;padding:10px;margin-bottom:10px}
+.file-list{display:grid;gap:8px}
+.file-item{display:grid;grid-template-columns:52px 1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid #888;padding:8px}
+.file-icon{width:52px;height:52px;display:grid;place-items:center;font-weight:900;border:2px solid #111;color:#fff;font-size:12px;text-align:center;line-height:1.1}
+.file-icon.pdf{background:#dc2626}.file-icon.doc{background:#2563eb}.file-icon.jpg,.file-icon.png{background:#059669}.file-icon.other{background:#6b7280}
+.thumb{max-width:220px;width:100%;border:2px solid #111;display:block;margin-top:6px}
+.file-item a{color:#0000ee}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.toolbar select{padding:5px}
+.share-note{font-size:13px;background:#fff;border-left:6px solid #000080;padding:8px}
+.kbd{font-family:monospace;background:#fff;border:1px solid #888;padding:0 4px}
+
+/* TASKBAR */
+.taskbar{position:fixed;left:0;right:0;bottom:0;min-height:46px;background:var(--face);border-top:2px solid #fff;box-shadow:0 -1px 0 #888;display:flex;align-items:center;gap:6px;padding:4px 6px;z-index:50}
+.start{background:linear-gradient(180deg,#3c873c,#2a5e2a);color:#fff;font-weight:900;border:2px solid;border-color:#a7f3a7 #123812 #123812 #a7f3a7;padding:6px 14px;border-radius:0 10px 10px 0;font-style:italic}
+.task-btn{border:2px solid;border-color:#fff #404040 #404040 #fff;background:#d4d0c8;padding:5px 9px;font-size:12px;font-weight:700;white-space:nowrap}
+.task-btn.logout{background:#ffe1e1}
+.task-live{font-family:"VT323",monospace;font-size:17px;background:#052e16;color:#4ade80;padding:2px 8px;border:2px inset #fff;white-space:nowrap}
+.task-live.off{color:#f87171}
+.clock{margin-left:auto;font-family:"VT323",monospace;font-size:20px;background:#ece9d8;border:2px inset #fff;padding:2px 10px;white-space:nowrap}
+
+@media(max-width:900px){
+  .windows{grid-template-columns:1fr}
+  .board{grid-template-columns:1fr}
+  .profiles-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .taskbar{overflow:auto}
+  .top-banner{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:700px){ .task-btn.nav{display:none} .taskbar{gap:8px} }
+@media(max-width:520px){ .form-grid{grid-template-columns:1fr} .file-item{grid-template-columns:44px 1fr} .file-item .btn{grid-column:1/-1} }
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><button type="button" tabindex="-1">_</button><button type="button" tabindex="-1">×</button></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices — move a card or leave a note and it shows up on the other side.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+  <div class="top-banner">
+    <div>
+      <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+      <p><b>Live sync edition:</b> profiles, project cards, phone notes and files are shared between your two accounts. Anything either of you changes appears on the other device in seconds — no exporting, no swapping files.</p>
+    </div>
+    <div class="top-actions">
+      <span class="sync-pill connecting" id="syncPill">● CONNECTING…</span>
+      <label class="btn" for="importOld" style="display:inline-block">⬆ Import old export</label>
+      <input id="importOld" type="file" accept="application/json" hidden>
+    </div>
+  </div>
+
+  <nav class="icons" aria-label="Desktop icons">
+    <button class="icon-btn" data-open="win-profiles"><div class="icon-pic">👥</div><span>Profiles<br>MySpace</span></button>
+    <button class="icon-btn" data-open="win-board"><div class="icon-pic">📌</div><span>Projects<br>Board</span></button>
+    <button class="icon-btn" data-open="win-phone"><div class="icon-pic">📱</div><span>Phone<br>Notes</span></button>
+    <button class="icon-btn" data-open="win-files"><div class="icon-pic">🗂️</div><span>File<br>Shelf</span></button>
+    <button class="icon-btn" data-open="win-help"><div class="icon-pic">💾</div><span>How Sync<br>Works</span></button>
+  </nav>
+
+  <main class="windows" id="windows">
+    <!-- PROFILES -->
+    <section class="window" id="win-profiles">
+      <div class="titlebar"><b><i>♡</i> profiles.htm — MySpace</b><div class="win-btns"><button data-min="win-profiles">_</button><button data-close="win-profiles">×</button></div></div>
+      <div class="win-body" id="body-win-profiles">
+        <div class="profiles-grid">
+          <article class="profile">
+            <div class="profile-head"><div class="avatar grey" data-avatar="grey">G</div><div><strong style="font-size:18px" data-pname="grey">Grey</strong><div style="font-size:12px;color:#555">Las Vegas • Writer &amp; Artist</div><div style="font-size:12px">★ Top 8 forever</div></div></div>
+            <label>Display name</label><input data-profile="grey" data-field="display_name">
+            <label>Mood / status</label><input data-profile="grey" data-field="mood">
+            <label>Currently working on</label><input data-profile="grey" data-field="working_on">
+            <label>Favourite song</label><input data-profile="grey" data-field="fav_song">
+            <label>Avatar image URL (optional)</label><input data-profile="grey" data-field="avatar_url" placeholder="https://…">
+            <div class="mood" data-mood-preview="grey">Mood: —</div>
+          </article>
+          <article class="profile">
+            <div class="profile-head"><div class="avatar partner" data-avatar="partner">P</div><div><strong style="font-size:18px" data-pname="partner">Partner</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
+            <label>Display name</label><input data-profile="partner" data-field="display_name">
+            <label>Mood / status</label><input data-profile="partner" data-field="mood">
+            <label>Currently working on</label><input data-profile="partner" data-field="working_on">
+            <label>Favourite song</label><input data-profile="partner" data-field="fav_song">
+            <label>Avatar image URL (optional)</label><input data-profile="partner" data-field="avatar_url" placeholder="https://…">
+            <div class="mood" data-mood-preview="partner">Mood: —</div>
+          </article>
+        </div>
+        <div class="friends">
+          <h3>Grey's Top Friends</h3>
+          <div class="friend-row">
+            <div class="friend"><div class="friend-face" style="background:#111">🐾</div><b>Pancake</b><small>4 • black shorthair<br>Chief supervisor</small></div>
+            <div class="friend"><div class="friend-face" style="background:#b45309">🐾</div><b>Kyoko</b><small>11 • calico Scottish Fold<br>Senior editor</small></div>
+            <div class="friend"><div class="friend-face" style="background:#be185d">🐾</div><b>Coffee</b><small>1 • calico shorthair<br>Chaos intern</small></div>
+            <div class="friend"><div class="friend-face" style="background:#000080">♥</div><b>You Two</b><small>Grey × Partner<br>The main characters</small></div>
+          </div>
+          <p style="margin:8px 0 0;font-size:12px;color:#555">Profile edits save to the shared account and appear on your partner's screen live.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHONE -->
+    <section class="window" id="win-phone">
+      <div class="titlebar"><b><i>☎</i> phone.exe — Leave a note</b><div class="win-btns"><button data-min="win-phone">_</button><button data-close="win-phone">×</button></div></div>
+      <div class="win-body" id="body-win-phone">
+        <div class="phone-wrap"><div class="phone">
+          <div class="speaker"></div>
+          <div class="screen">
+            <div class="screen-head"><span>✉ INBOX</span><span id="phoneClock">--:--</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><small><b id="unreadCount">0 new</b></small><button class="btn small" id="markRead" type="button">Mark all read</button></div>
+            <div class="thread" id="thread"></div>
+            <form class="phone-form" id="msgForm">
+              <label style="font-size:12px;font-weight:700">FROM
+                <select id="msgFrom"><option value="Grey">Grey</option><option value="Partner">Partner</option></select>
+              </label>
+              <textarea id="msgText" rows="2" placeholder="miss u, check this draft… (T9 vibes encouraged)" required></textarea>
+              <button class="btn primary" type="submit">SEND TXT ➤</button>
+            </form>
+          </div>
+          <div class="keys" aria-hidden="true"><div>1</div><div>2 abc</div><div>3 def</div><div>4 ghi</div><div>5 jkl</div><div>6 mno</div><div>7 pqrs</div><div>8 tuv</div><div>9 wxyz</div><div>*</div><div>0 +</div><div>#</div></div>
+        </div></div>
+        <p style="font-size:12px;text-align:center;color:#333">Notes sync live — leave one here and it pops up on your partner's phone window too.</p>
+      </div>
+    </section>
+
+    <!-- BOARD -->
+    <section class="window wide" id="win-board">
+      <div class="titlebar"><b><i>▦</i> projects.doc — Our Trello Board</b><div class="win-btns"><button data-min="win-board">_</button><button data-close="win-board">×</button></div></div>
+      <div class="win-body" id="body-win-board">
+        <div class="board-tools">
+          <h3 id="formTitle">+ Add a project card</h3>
+          <form id="cardForm">
+            <input type="hidden" id="cardId">
+            <div class="form-grid">
+              <div><label>Title *</label><input id="cTitle" required placeholder="e.g. Zine layout draft"></div>
+              <div><label>Owner</label><select id="cOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
+              <div><label>Tag</label><select id="cTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
+              <div><label>Due date</label><input type="date" id="cDue"></div>
+              <div><label>Column</label><select id="cCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
+              <div style="grid-column:span 3"><label>Notes</label><input id="cNotes" placeholder="One-line context, links, next step…"></div>
+              <div class="full"><label>Checklist — one item per line</label><textarea id="cCheck" rows="2" placeholder="Draft outline&#10;Share for feedback&#10;Final export"></textarea></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="btn primary" type="submit">Save card</button><button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button></div>
+          </form>
+        </div>
+        <div class="board" id="board"></div>
+      </div>
+    </section>
+
+    <!-- FILES -->
+    <section class="window wide" id="win-files">
+      <div class="titlebar"><b><i>🗀</i> files — File Shelf</b><div class="win-btns"><button data-min="win-files">_</button><button data-close="win-files">×</button></div></div>
+      <div class="win-body" id="body-win-files">
+        <p class="share-note">Upload the real file (doc, JPG, PDF…) and it lands in your shared storage — or just add a name + link if the file lives somewhere else. Either way, your partner sees it here.</p>
+        <form class="file-form" id="fileForm">
+          <div class="form-grid">
+            <div><label>File name</label><input id="fName" placeholder="cover-draft-v2.jpg"></div>
+            <div><label>Type</label><select id="fType"><option value="jpg">JPG</option><option value="png">PNG</option><option value="pdf">PDF</option><option value="doc">DOC</option><option value="txt">TXT</option><option value="other">Other</option></select></div>
+            <div><label>Project</label><select id="fProject"></select></div>
+            <div><label>Upload a file (optional)</label><input id="fUpload" type="file"></div>
+            <div><label>Link (optional)</label><input id="fUrl" placeholder="https://…"></div>
+            <div style="grid-column:span 3"><label>Note</label><input id="fNote" placeholder="What is this? Which version?"></div>
+          </div>
+          <button class="btn primary" style="margin-top:8px" type="submit" id="fileSubmit">Add to shelf</button>
+        </form>
+        <div class="toolbar"><label><b>Show:</b> <select id="fileFilter"><option value="">All projects</option></select></label><span id="fileCount" style="font-size:12px;color:#555"></span></div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+    </section>
+
+    <!-- HELP -->
+    <section class="window" id="win-help">
+      <div class="titlebar"><b><i>?</i> readme.txt — How sync works</b><div class="win-btns"><button data-min="win-help">_</button><button data-close="win-help">×</button></div></div>
+      <div class="win-body" id="body-win-help">
+        <div style="background:#fff;border:2px inset #fff;padding:12px">
+          <h3 style="margin:0 0 6px;font-family:'VT323',monospace;font-size:24px">For Grey &amp; Partner 💌</h3>
+          <ol style="margin:6px 0;padding-left:18px">
+            <li><b>Log in</b> on each phone / computer with your own account.</li>
+            <li><b>Edit anything</b> — profiles, cards, notes, files — it saves to your shared space, not just this device.</li>
+            <li>Your partner sees the change <b>live</b>, usually within a second or two. Watch for the <span class="kbd">LIVE SYNC ON</span> light in the taskbar.</li>
+            <li>Coming from the old shareable version? Tap <span class="kbd">Import old export</span> up top and pick your saved <span class="kbd">our-desktop-export.json</span> — your projects, notes and file list move in here.</li>
+          </ol>
+          <p style="font-size:13px">Only the two accounts created for you can get in — there's no public sign-up. Keep your passwords to yourselves.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <p style="text-align:center;color:#fff;text-shadow:1px 1px 0 #000;font-size:12px;margin-top:14px">Made for two • Live sync edition • Click a desktop icon or taskbar button to reopen a closed window</p>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <button class="start" id="startBtn">⊞ start</button>
+  <button class="task-btn nav" data-open="win-profiles">Profiles</button>
+  <button class="task-btn nav" data-open="win-board">Projects</button>
+  <button class="task-btn nav" data-open="win-phone">Phone</button>
+  <button class="task-btn nav" data-open="win-files">Files</button>
+  <button class="task-btn nav" data-open="win-help">Readme</button>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" id="logoutBtn">Log out</button>
+  <div class="clock" id="clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+var SUPABASE_URL = 'https://nvwefyrbpokbebzbayka.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_2ZfO2GoQVAxTixcDIX0AUQ_iaGfV-nj';
+var COLS = ['Ideas','In Progress','Needs Review','Done'];
+var BUCKET = 'project-files';
+
+var sb = null;
+try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) { sb = null; }
+
+var state = { profiles: {}, projects: [], messages: [], files: [] };
+var signedUrls = {};   // storage_path -> signed URL (session cache)
+var channel = null;
+var entered = false;
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]}); }
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.style.display='block'; setTimeout(function(){ t.style.display='none'; },2800); }
+function fmtTime(iso){ try{ var d=new Date(iso); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
+function showSyncError(on){ $('syncError').hidden = !on; if(on) setLive(false); }
+function setLive(on){
+  var pill=$('syncPill'), tl=$('taskLive');
+  pill.className = 'sync-pill' + (on ? '' : ' off');
+  pill.textContent = on ? '● LIVE SYNC ON' : '● NOT LIVE';
+  tl.className = 'task-live' + (on ? '' : ' off');
+  tl.textContent = on ? '● LIVE SYNC ON' : '● OFFLINE';
+}
+function checkErr(res){ if(res && res.error){ showSyncError(true); return true; } return false; }
+
+/* ---------- Auth ---------- */
+function showLoginError(msg){
+  var e=$('loginErr');
+  if(!msg){ e.hidden = true; e.textContent=''; return; }
+  e.hidden = false; e.textContent = msg;
+}
+$('loginForm').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  showLoginError('');
+  if(!sb){ showLoginError('The sync library could not load — check your connection and reload the page.'); return; }
+  var btn=$('loginBtn'); btn.disabled = true; btn.textContent = 'Logging in…';
+  sb.auth.signInWithPassword({ email: $('loginEmail').value.trim(), password: $('loginPass').value })
+    .then(function(res){
+      btn.disabled = false; btn.textContent = 'Log in ➤';
+      if(res.error){ showLoginError('Login failed: ' + res.error.message + ' — double-check the email and password for your account.'); return; }
+      enterApp();
+    })
+    .catch(function(){ btn.disabled = false; btn.textContent = 'Log in ➤'; showLoginError('Could not reach the login server — check your connection and try again.'); });
+});
+$('logoutBtn').addEventListener('click', function(){
+  var done = function(){ location.reload(); };
+  if(sb){ sb.auth.signOut().then(done).catch(done); } else { done(); }
+});
+
+/* ---------- Data loading ---------- */
+function fetchProfiles(){
+  return sb.from('profiles').select('*').then(function(res){
+    if(checkErr(res)) return;
+    state.profiles = {};
+    (res.data||[]).forEach(function(r){ state.profiles[r.id] = r; });
+    renderProfiles();
+  });
+}
+function fetchProjects(){
+  return sb.from('projects').select('*').order('position',{ascending:true}).order('created_at',{ascending:true}).then(function(res){
+    if(checkErr(res)) return;
+    state.projects = res.data || [];
+    renderBoard(); renderProjectSelectors(); renderFiles();
+  });
+}
+function fetchMessages(){
+  return sb.from('messages').select('*').order('created_at',{ascending:true}).then(function(res){
+    if(checkErr(res)) return;
+    state.messages = res.data || [];
+    renderMessages();
+  });
+}
+function fetchFiles(){
+  return sb.from('files').select('*').order('created_at',{ascending:false}).then(function(res){
+    if(checkErr(res)) return;
+    state.files = res.data || [];
+    renderFiles();
+  });
+}
+function loadAll(){
+  return Promise.all([fetchProfiles(), fetchProjects(), fetchMessages(), fetchFiles()])
+    .catch(function(){ showSyncError(true); });
+}
+function subscribeRealtime(){
+  if(channel){ return; }
+  channel = sb.channel('couples-live')
+    .on('postgres_changes', { event:'*', schema:'public', table:'profiles' }, function(){ fetchProfiles(); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'projects' }, function(){ fetchProjects(); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'messages' }, function(){ fetchMessages(); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'files' }, function(){ fetchFiles(); })
+    .subscribe(function(status){
+      if(status === 'SUBSCRIBED'){ setLive(true); showSyncError(false); }
+      else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED'){ setLive(false); }
+    });
+}
+function enterApp(){
+  if(entered || !sb) return;
+  entered = true;
+  $('loginGate').hidden = true;
+  $('appRoot').hidden = false;
+  $('taskbar').hidden = false;
+  loadAll().then(function(){ subscribeRealtime(); });
+}
+
+/* ---------- Profiles ---------- */
+function renderProfiles(){
+  ['grey','partner'].forEach(function(k){
+    var p = state.profiles[k] || {};
+    document.querySelectorAll('[data-profile="'+k+'"]').forEach(function(inp){
+      if(document.activeElement !== inp) inp.value = p[inp.dataset.field] || '';
+    });
+    var prev = document.querySelector('[data-mood-preview="'+k+'"]');
+    if(prev) prev.textContent = 'Mood: ' + (p.mood || '—');
+    var nm = document.querySelector('[data-pname="'+k+'"]');
+    if(nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Partner');
+    var av = document.querySelector('[data-avatar="'+k+'"]');
+    if(av){
+      if(p.avatar_url){ av.innerHTML = '<img src="'+esc(p.avatar_url)+'" alt="">'; }
+      else { av.textContent = (p.display_name || k).trim().charAt(0).toUpperCase() || '?'; }
+    }
+  });
+}
+var profileTimers = {};
+document.querySelectorAll('[data-profile]').forEach(function(inp){
+  inp.addEventListener('input', function(){
+    var key = inp.dataset.profile, field = inp.dataset.field, val = inp.value;
+    if(!state.profiles[key]) state.profiles[key] = { id: key };
+    state.profiles[key][field] = val;
+    var prev = document.querySelector('[data-mood-preview="'+key+'"]');
+    if(field === 'mood' && prev) prev.textContent = 'Mood: ' + (val || '—');
+    clearTimeout(profileTimers[key+field]);
+    profileTimers[key+field] = setTimeout(function(){
+      var upd = { updated_at: new Date().toISOString() }; upd[field] = val;
+      sb.from('profiles').update(upd).eq('id', key).then(function(res){ if(!checkErr(res)) showSyncError(false); });
+    }, 700);
+  });
+});
+
+/* ---------- Board ---------- */
+function checklistOf(p){
+  var c = p.checklist;
+  if(!c) return [];
+  if(typeof c === 'string'){ try{ c = JSON.parse(c); }catch(e){ return c.split('\n').filter(Boolean); } }
+  if(!Array.isArray(c)) return [];
+  return c.map(function(it){ return typeof it === 'string' ? it : (it && (it.text || it.label) ? (it.text || it.label) : ''); }).filter(Boolean);
+}
+function renderBoard(){
+  var board = $('board'); board.innerHTML = '';
+  COLS.forEach(function(col){
+    var items = state.projects.filter(function(p){ return p.column_status === col; });
+    var div = document.createElement('div'); div.className = 'col';
+    var html = '<h4>'+esc(col)+' <span>'+items.length+'</span></h4>';
+    if(!items.length) html += '<div class="empty">No cards yet.<br>Add one above ↑</div>';
+    items.forEach(function(p){
+      var checks = checklistOf(p);
+      html += '<article class="card"><h5>'+esc(p.title)+'</h5><div class="meta"><span class="pill owner">'+esc(p.owner || 'Both')+'</span>'
+        + (p.tag ? '<span class="pill tag">'+esc(p.tag)+'</span>' : '')
+        + (p.due_date ? '<span class="pill due">Due '+esc(p.due_date)+'</span>' : '') + '</div>'
+        + (p.notes ? '<p>'+esc(p.notes)+'</p>' : '')
+        + (checks.length ? '<ul class="check">'+checks.map(function(c){ return '<li>'+esc(c)+'</li>'; }).join('')+'</ul>' : '')
+        + '<div class="card-actions">'
+        + '<button class="btn small" data-move="'+p.id+'|-1">◀ Move</button>'
+        + '<button class="btn small" data-move="'+p.id+'|1">Move ▶</button>'
+        + '<button class="btn small" data-edit="'+p.id+'">Edit</button>'
+        + '<button class="btn small danger" data-del="'+p.id+'">Delete</button></div></article>';
+    });
+    div.innerHTML = html; board.appendChild(div);
+  });
+  board.querySelectorAll('[data-move]').forEach(function(b){ b.onclick = function(){
+    var parts = b.dataset.move.split('|'); var id = parts[0], dir = parseInt(parts[1], 10);
+    var p = state.projects.find(function(x){ return x.id === id; }); if(!p) return;
+    var n = COLS.indexOf(p.column_status) + dir; if(n < 0 || n >= COLS.length) return;
+    var pos = state.projects.filter(function(x){ return x.column_status === COLS[n]; }).length;
+    sb.from('projects').update({ column_status: COLS[n], position: pos, updated_at: new Date().toISOString() }).eq('id', id)
+      .then(function(res){ if(!checkErr(res)){ fetchProjects(); toast('Moved to ' + COLS[n]); } });
+  }; });
+  board.querySelectorAll('[data-del]').forEach(function(b){ b.onclick = function(){
+    if(b.dataset.armed === '1'){
+      sb.from('projects').delete().eq('id', b.dataset.del).then(function(res){ if(!checkErr(res)){ fetchProjects(); toast('Card deleted'); } });
+    } else {
+      b.dataset.armed = '1'; b.textContent = 'Tap again to delete';
+      setTimeout(function(){ if(b.isConnected){ b.dataset.armed = ''; b.textContent = 'Delete'; } }, 3000);
+    }
+  }; });
+  board.querySelectorAll('[data-edit]').forEach(function(b){ b.onclick = function(){
+    var p = state.projects.find(function(x){ return x.id === b.dataset.edit; }); if(!p) return;
+    $('cardId').value = p.id; $('cTitle').value = p.title || ''; $('cOwner').value = p.owner || 'Both';
+    if(p.tag) $('cTag').value = p.tag;
+    $('cDue').value = p.due_date || ''; $('cCol').value = p.column_status || 'Ideas';
+    $('cNotes').value = p.notes || ''; $('cCheck').value = checklistOf(p).join('\n');
+    $('formTitle').textContent = '✎ Edit card'; $('cancelEdit').hidden = false;
+    $('win-board').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }; });
+}
+$('cardForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var title = $('cTitle').value.trim(); if(!title) return;
+  var col = $('cCol').value;
+  var row = {
+    title: title,
+    owner: $('cOwner').value,
+    tag: $('cTag').value,
+    due_date: $('cDue').value || null,
+    column_status: col,
+    notes: $('cNotes').value.trim(),
+    checklist: $('cCheck').value.split('\n').map(function(s){ return s.trim(); }).filter(Boolean),
+    updated_at: new Date().toISOString()
+  };
+  var id = $('cardId').value;
+  var req;
+  if(id){ req = sb.from('projects').update(row).eq('id', id); }
+  else { row.position = state.projects.filter(function(x){ return x.column_status === col; }).length; req = sb.from('projects').insert(row); }
+  req.then(function(res){
+    if(checkErr(res)) return;
+    e.target.reset(); $('cardId').value = ''; $('formTitle').textContent = '+ Add a project card'; $('cancelEdit').hidden = true;
+    fetchProjects(); toast(id ? 'Card updated ✓' : 'Card added ✓');
+  });
+});
+$('cancelEdit').onclick = function(){ $('cardForm').reset(); $('cardId').value = ''; $('formTitle').textContent = '+ Add a project card'; this.hidden = true; };
+
+/* ---------- Messages ---------- */
+function renderMessages(){
+  var th = $('thread'); th.innerHTML = '';
+  var unread = state.messages.filter(function(m){ return !m.is_read; }).length;
+  $('unreadCount').textContent = unread ? unread + ' new' : 'all read ✓';
+  state.messages.forEach(function(m){
+    var d = document.createElement('div');
+    d.className = 'msg ' + (m.sender === 'Grey' ? 'from-grey' : 'from-partner') + (m.is_read ? '' : ' unread');
+    d.innerHTML = '<b>'+esc(m.sender)+'</b>' + (m.is_read ? '' : '<span class="new-badge">NEW</span>') + '<br>' + esc(m.body) + '<small>' + fmtTime(m.created_at) + '</small>';
+    th.appendChild(d);
+  });
+  th.scrollTop = th.scrollHeight;
+}
+$('msgForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var txt = $('msgText').value.trim(); if(!txt) return;
+  sb.from('messages').insert({ sender: $('msgFrom').value, body: txt }).then(function(res){
+    if(checkErr(res)) return;
+    e.target.reset(); fetchMessages(); toast('Note sent 💌');
+  });
+});
+$('markRead').onclick = function(){
+  sb.from('messages').update({ is_read: true }).eq('is_read', false).then(function(res){ if(!checkErr(res)) fetchMessages(); });
+};
+
+/* ---------- Files ---------- */
+function projectTitle(id){
+  if(!id) return 'General';
+  var p = state.projects.find(function(x){ return x.id === id; });
+  return p ? p.title : 'General';
+}
+function extType(name){
+  var ext = (name.split('.').pop() || '').toLowerCase();
+  if(ext === 'jpg' || ext === 'jpeg') return 'jpg';
+  if(ext === 'png') return 'png';
+  if(ext === 'pdf') return 'pdf';
+  if(ext === 'doc' || ext === 'docx' || ext === 'txt' || ext === 'md') return ext === 'txt' || ext === 'md' ? 'txt' : 'doc';
+  return 'other';
+}
+function renderProjectSelectors(){
+  var sel = $('fProject'), filt = $('fileFilter');
+  var cur = sel.value, curF = filt.value;
+  sel.innerHTML = '<option value="">General (no project)</option>' + state.projects.map(function(p){ return '<option value="'+p.id+'">'+esc(p.title)+'</option>'; }).join('');
+  if(cur) sel.value = cur;
+  filt.innerHTML = '<option value="">All projects</option><option value="__general">General</option>' + state.projects.map(function(p){ return '<option value="'+p.id+'">'+esc(p.title)+'</option>'; }).join('');
+  if(curF) filt.value = curF;
+}
+function renderFiles(){
+  var filter = $('fileFilter').value;
+  var list = $('fileList'); list.innerHTML = '';
+  var items = state.files.filter(function(f){
+    if(!filter) return true;
+    if(filter === '__general') return !f.project_id;
+    return f.project_id === filter;
+  });
+  $('fileCount').textContent = items.length + ' file' + (items.length === 1 ? '' : 's') + ' on the shelf';
+  if(!items.length){ list.innerHTML = '<div class="empty">Nothing here yet — add a file above.</div>'; return; }
+  items.forEach(function(f){
+    var t = (f.file_type || 'other').toLowerCase();
+    var cls = t === 'pdf' ? 'pdf' : t === 'doc' || t === 'txt' ? 'doc' : (t === 'jpg' || t === 'png') ? 'jpg' : 'other';
+    var div = document.createElement('div'); div.className = 'file-item';
+    var right = '';
+    if(f.storage_path) right = '<div style="font-size:13px;margin-top:2px"><button class="btn small" data-dl="'+f.id+'">⬇ Download / open</button></div><img class="thumb" data-thumb="'+f.id+'" alt="" hidden>';
+    else if(f.link) right = '<div style="font-size:13px;margin-top:2px"><a href="'+esc(f.link)+'" target="_blank" rel="noopener">Open link ↗</a></div>';
+    div.innerHTML = '<div class="file-icon '+cls+'">'+esc(t.toUpperCase())+'<br>FILE</div><div><b>'+esc(f.name)+'</b> <span class="pill tag">'+esc(projectTitle(f.project_id))+'</span>'
+      + (f.note ? '<div style="font-size:13px;margin-top:2px">'+esc(f.note)+'</div>' : '') + right + '</div>'
+      + '<button class="btn small danger" data-delfile="'+f.id+'">Delete</button>';
+    list.appendChild(div);
+  });
+  list.querySelectorAll('[data-delfile]').forEach(function(b){ b.onclick = function(){
+    if(b.dataset.armed === '1'){
+      var f = state.files.find(function(x){ return x.id === b.dataset.delfile; });
+      sb.from('files').delete().eq('id', b.dataset.delfile).then(function(res){
+        if(checkErr(res)) return;
+        if(f && f.storage_path){ sb.storage.from(BUCKET).remove([f.storage_path]); }
+        fetchFiles(); toast('Removed from shelf');
+      });
+    } else {
+      b.dataset.armed = '1'; b.textContent = 'Tap again';
+      setTimeout(function(){ if(b.isConnected){ b.dataset.armed = ''; b.textContent = 'Delete'; } }, 3000);
+    }
+  }; });
+  list.querySelectorAll('[data-dl]').forEach(function(b){ b.onclick = function(){
+    var f = state.files.find(function(x){ return x.id === b.dataset.dl; }); if(!f || !f.storage_path) return;
+    sb.storage.from(BUCKET).createSignedUrl(f.storage_path, 3600).then(function(res){
+      if(res.error || !res.data){ toast('Could not open that file'); return; }
+      window.open(res.data.signedUrl, '_blank', 'noopener');
+    });
+  }; });
+  // Image previews for uploaded pictures
+  items.forEach(function(f){
+    var t = (f.file_type || '').toLowerCase();
+    if(!f.storage_path || (t !== 'jpg' && t !== 'png')) return;
+    var img = list.querySelector('[data-thumb="'+f.id+'"]'); if(!img) return;
+    if(signedUrls[f.storage_path]){ img.src = signedUrls[f.storage_path]; img.hidden = false; img.alt = f.name; return; }
+    sb.storage.from(BUCKET).createSignedUrl(f.storage_path, 3600).then(function(res){
+      if(res.data && res.data.signedUrl){ signedUrls[f.storage_path] = res.data.signedUrl; img.src = res.data.signedUrl; img.hidden = false; img.alt = f.name; }
+    });
+  });
+}
+$('fileForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var up = $('fUpload').files[0];
+  var name = $('fName').value.trim() || (up ? up.name : '');
+  if(!name && !up){ toast('Give the entry a name or pick a file to upload'); return; }
+  var btn = $('fileSubmit'); btn.disabled = true; btn.textContent = 'Adding…';
+  function finish(storagePath){
+    var row = {
+      name: name,
+      file_type: up ? extType(up.name) : $('fType').value,
+      project_id: $('fProject').value || null,
+      note: $('fNote').value.trim(),
+      link: $('fUrl').value.trim(),
+      storage_path: storagePath || ''
+    };
+    sb.from('files').insert(row).then(function(res){
+      btn.disabled = false; btn.textContent = 'Add to shelf';
+      if(checkErr(res)) return;
+      e.target.reset(); renderProjectSelectors(); fetchFiles(); toast('Added to file shelf 🗂️');
+    });
+  }
+  if(up){
+    var path = Date.now() + '-' + up.name.replace(/[^\w.\-]+/g, '_');
+    sb.storage.from(BUCKET).upload(path, up).then(function(res){
+      if(res.error){ btn.disabled = false; btn.textContent = 'Add to shelf'; showSyncError(true); toast('Upload failed: ' + res.error.message); return; }
+      finish(path);
+    });
+  } else { finish(''); }
+});
+$('fileFilter').addEventListener('change', renderFiles);
+
+/* ---------- Import from the old shareable version ---------- */
+$('importOld').addEventListener('change', function(e){
+  var file = e.target.files[0]; if(!file) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var data;
+    try { data = JSON.parse(r.result); } catch(err){ toast('That file did not parse — nothing imported'); return; }
+    if(!data.profiles && !data.projects && !data.messages && !data.files){ toast('That does not look like an old export — nothing imported'); return; }
+    var jobs = [];
+    if(data.profiles){
+      ['grey','partner'].forEach(function(k){
+        var p = data.profiles[k]; if(!p) return;
+        jobs.push(sb.from('profiles').update({ display_name: p.name || '', mood: p.mood || '', working_on: p.working || '', fav_song: p.song || '', updated_at: new Date().toISOString() }).eq('id', k));
+      });
+    }
+    var titleToId = {};
+    if(data.projects && data.projects.length){
+      var rows = data.projects.map(function(p, i){
+        return { title: p.title || 'Untitled', owner: p.owner || 'Both', tag: p.tag || '', due_date: p.due || null, notes: p.notes || '', column_status: COLS.indexOf(p.col) >= 0 ? p.col : 'Ideas', position: i, checklist: (p.check || '').split('\n').map(function(s){ return s.trim(); }).filter(Boolean) };
+      });
+      jobs.push(sb.from('projects').insert(rows).select('id,title').then(function(res){
+        (res.data || []).forEach(function(row){ titleToId[row.title] = row.id; });
+      }));
+    }
+    if(data.messages && data.messages.length){
+      var msgs = data.messages.map(function(m){
+        return { sender: m.from || 'Grey', body: m.text || '', is_read: !!m.read, created_at: m.time || new Date().toISOString() };
+      });
+      jobs.push(sb.from('messages').insert(msgs));
+    }
+    Promise.all(jobs).then(function(){
+      if(data.files && data.files.length){
+        var frows = data.files.map(function(f){
+          return { name: f.name || 'file', file_type: (f.type || 'other').toLowerCase(), project_id: titleToId[f.project] || null, note: f.note || '', link: f.url || '', storage_path: '' };
+        });
+        return sb.from('files').insert(frows);
+      }
+    }).then(function(){ loadAll(); toast('Imported ✓ Everything from the old export is in'); })
+      .catch(function(){ showSyncError(true); toast('Import hit a snag — some items may not have landed'); });
+  };
+  r.readAsText(file); e.target.value = '';
+});
+
+/* ---------- Windows & chrome ---------- */
+function openWin(id){ var w = $(id); w.classList.remove('closed'); var b = $('body-' + id); if(b) b.classList.remove('hidden'); w.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', function(){ openWin(b.dataset.open); }); });
+document.querySelectorAll('[data-close]').forEach(function(b){ b.addEventListener('click', function(){ $(b.dataset.close).classList.add('closed'); }); });
+document.querySelectorAll('[data-min]').forEach(function(b){ b.addEventListener('click', function(){ $('body-' + b.dataset.min).classList.toggle('hidden'); }); });
+$('startBtn').onclick = function(){ document.querySelectorAll('.window').forEach(function(w){ w.classList.remove('closed'); }); window.scrollTo({ top: 0, behavior: 'smooth' }); toast('All windows restored'); };
+
+function tick(){ var d = new Date(); var s = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); $('clock').textContent = s; var pc = $('phoneClock'); if(pc) pc.textContent = s; }
+setInterval(tick, 15000); tick();
+
+/* ---------- Boot ---------- */
+if(!sb){
+  showLoginError('The sync library could not load — check your connection and reload the page.');
+} else {
+  sb.auth.getSession().then(function(res){
+    if(res.data && res.data.session){ enterApp(); }
+  }).catch(function(){ /* stay on login screen */ });
+  sb.auth.onAuthStateChange(function(event, session){
+    if(session && !entered){ enterApp(); }
+  });
+}
+</script>
+</body>
+</html>
