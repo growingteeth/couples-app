@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <link rel="icon" href="data:,"/>
 <title>Our Desktop — Phone Notes (Live Sync)</title>
-<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
@@ -17,7 +17,7 @@
   <section class="window login-window">
     <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ Grey × Sam — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ softsignal — grey × sam, private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -35,9 +35,10 @@
     <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
     <div class="top-banner">
       <div>
-        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <strong>softsignal ♥ our desktop — grey × sam</strong>
         <p><b>Phone notes:</b> your shared 2000s inbox. Leave a note, it lands on both phones live.</p>
       </div>
+      <span class="sticker">grey × sam ♡</span>
       <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
     </div>
 
