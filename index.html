@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <link rel="icon" href="data:,"/>
 <title>Our Desktop — Directory (Live Sync)</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
@@ -15,9 +15,9 @@
 <!-- LOGIN GATE -->
 <div class="login-wrap" id="loginGate">
   <section class="window login-window">
-    <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABcElEQVR4nO2YPQ6DMAyFTdWNG2RH6h3YegdOyR269Q5I3XODznSogtI0TmKKbSryTSUN8F5s5weASqVS0aSh3mCMmcM2ay35OVtxLu3ohD/Gy9d/3QAzgI6RohcaY+aY8JBumMRNnHIdSsUDvKMTSzFOkgYo4h3SJoprwKftb0uaPO9X0REPQSOAjb4vPnYNIBuFbA34xMSm2iUgGdgjxzKAFaxmIaMGrLVNN0xf7aHYmHjJBW3VNKo9dfokUwiLAobrS138fiFbAxQTj/GymJCKUnGepnejnyPfDdPym3uN2Pw84EZeygTLgyVNsCxkTqxETbCtxFImWLcSEibY90LcJkQ2c5wmxHajFBMUc+IHkdQUGwovmXpVTlIxEzF2awCgPE1yJtROZDlhbX9rsNTyUYuAIyaOUhPqZ2JflD87laaYegQca2tiNwYA0iawmlFPIZ81H852ZQAArwk1QWtxhSz9uX5T/nLkK5XKwXgBmXTjP+9yZTMAAAAASUVORK5CYII=" alt=""></i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ softsignal — grey × sam, private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -35,23 +35,25 @@
     <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
     <div class="top-banner">
       <div>
-        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
+        <strong>softsignal ♥ our desktop — grey × sam</strong>
         <p><b>Directory:</b> your profiles, and every project in one list. Click a project to open its own page — its details, checklist and private file shelf live there.</p>
       </div>
+      <span class="sticker">grey × sam ♡</span>
       <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
     </div>
 
     <nav class="topnav" aria-label="Pages">
-      <a href="index.html" aria-current="page"><div class="nav-pic">🏠</div><span>Directory<br>Home</span></a>
-      <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
-      <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
-      <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
+      <a href="index.html" aria-current="page"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7klEQVR4nO2XvRHCMBSDBccWbtIwACvQswEVa6ROQ8UELEGfFRiAhsYeggbaFHHOdmTIO/R1ufhPfnq5CBBCmGZVMqk/N+/h8/Hy4pxmQAgh6Wxr+s5fZsNY5H5tGMsAAHanZ9Z4ioDcTWOUXARFwOO2n73G9tAXzVMPjJFym4yqAZUEAID3PvrOOUfbx7yFzAuoZiGmTaaoIoDVoCnIQjG6Lv4pbVtehcxXwLyAahZi2mQKioDSHzEGi8sDuagHAAUaAAo0XBRoMjBvIfMCFGjGUKDJQIHm15gXYD7QqAKAEtksFhVoSjDfA0L8Ox/ovjYZU2r+vwAAAABJRU5ErkJggg==" alt=""></div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7ElEQVR4nO2ZwQ3DIAxFadUpyCK55JRFugliky7SUy9ZBNZIT63SiEaBb2RZ+u8URRj4tj+KiHOEQFwkJ/PerzXjc87w+ld0Am1uPSZ9vpbv8zyNf99J0CTgbKtsNzpP44+Io3lqWqtbC5WyLJn5D1AL3Xf7eSzlcb3inetUgaNMS1eBp1BL2Uux+3Y6i8gxmlKC4odhaI4130IUoA0FaGNegOjXaIyxanwIAV6TFdgikdFazFfAvACaWBuaWBvzAmhibWhibcwLoIm1oYm1oQBtzAsQMTFyOYsCC2i9FpcCEoD8G5DCvAcIAXkDjro1Bj1woJwAAAAASUVORK5CYII=" alt=""></div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABIUlEQVR4nO2ZLw7CMBTGO4LiAks6M8MBsIQb4EBgCYJrLLsGgnACHAKBgoDkAJiZNdkFsEORQPrWP6Rrafd+8lvF96Xf28syQhAEQZAuE0EipbS2bUQVxtiX554rI6boix4ytrblQwqlG1AP+wbe1HUG6lGUGzXzC97fAAZwjdIM/EPXmwj7Bs63qS0fUhZzeA8IA5yOh1bMmEQ6A1kG7wCb5HnzDIY9A58kSdL4rCzL1s7JUA5ACCH3bcppo1XBadc45rRxVXHaYLLntOdlpmPJ/wphANdozQDUdwio7xC6fYdQDqD6ZjB9TkZ3KhTEHhguU0577ApOM70vRHhfIQzgGq0ZgPoOYXpfiMA94BrvA0grJPqc+wfw/wCCIEi3eQHuXFgqctmhhAAAAABJRU5ErkJggg==" alt=""></div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABcUlEQVR4nO2YMdKCMBCF389QMWPNkKOk8AoWFt6AQ3EDCwuvYOFRYKidsXL0rzKjMSGbkIAM+5WBhPeS3WwCwDAMw6yZv6GHQojXVEJctG1r1JpNLSQ2OeWl4+mcVMRhv8O1LD/aZN/jeDrjsN8N9iUZUB9JhS5etUnCN8kGACCvCp/XnTy6u1G84lqWkH0/OMbic2A2A5fnJso4XiE0llii35lkBS7PjVG8K8Zd8Q8kNmAT/o7NhNpGXSQJId9QyasCsnPPtrFvUC8LPsK32e1TiLZFP7o7aRwvA/qgeVV4z7YufCxeBr7KfdcDJc1AbOEKUhKbzioArVJus1sy8QDRQEi5Ty1cETWJpxCsE60OzCEeWMthzlXuYx+zfSDfyKTl1gTQi04KyEmsTOhtc+O1C/2CYJ11JPEvwz+25mZwBUIQQrzqurY+b5rGOpshLH4FFm8geClTJHhIaI06TscsbKH/XjmEYhJzd2IYhpmGf2yyfUqYVKJHAAAAAElFTkSuQmCC" alt=""></div><span>Phone<br>Notes</span></a>
+      <a href="playlists.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB9ElEQVR4nO2ZsU7DMBCGD8TePVbnij5AR6YIlYGJ1+hQMVWIsUKdqg59jU4MRR27hQcAMUYo2XkCmBw5h+3cOZdGCH9SpcZK7P/3nc+KAxCJRCKRFpxJd5gkyXfTPWVZio0r1hFFOEbCSOsObMLfn56d918+3P5qa2Mk+EEs3CfaBTYTYiTIgCk+RDjGNMI1cc4dTFo87oe7llhudedSwm3oaFAjQY5ASJVpA3U8dgp1Nft5mkGeZvDy+sh6jmSg69TJ06x2rU1QosCOgDRYPJdGA13Ovk88NQoX1MH2owHcfHxRb7fuuOYktJ15jTcC2P1+NKh+PmzizXaueF8UvLVWP7jeHb0DmJExxRdFUf1XSlX/OZVmOlkCgHtfIKeQDx2R+7urqq0oCpit5rVrbWI6WbLLpYtOqhAWDwAwW81rEZGi9zLalmjAhlIKtotNrW272NQWshQii1iz3h2rhayUEqlCTZDKqBZHxaxGmJASCuAuo94UCn1XdZkNnXmfDtEUMsEmxsNDJ+M0LmLt3pcWXdC0A2v+Rxk9dRSosw8QEIFQE2+f16T7zMpDgWxA8jxTcjy2qNC9AcBfiSg13wY7hczOpdZEqHgAwbNRSjRwBHC+n+xs1MT2uucyMx4erIu0l9NpzJ/9PoA59ReaSCQS6ZcfJbvfEyGFJJQAAAAASUVORK5CYII=" alt=""></div><span>Playlists<br>CD Stack</span></a>
     </nav>
 
     <main>
       <!-- PROFILES -->
       <section class="window">
-        <div class="titlebar"><b><i>♡</i> profiles.htm — MySpace</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABJ0lEQVR4nO2YvRGCQBCFHzZgB1IBEbEJ3WBB0g0JMREVQAdUgIFjIHPC7R+K7Bcyt9y+9/aAAXAcx3GcHZNwC8frfZpfOze36PtJ61+QC0IbUxqR1s85xS6M3XxpnbQ+RLQAyk1D66X1n4gSQN18XietX4I0Qr/I6mHhuqfJ0qHefQIu4NtECWj7zroP9r6rAs7NLcnTbHMRbd8hT7PVt/IxRmjrFGLdBwgJbCWC0jxAHCHO5y4Hs69RACiGKrFKoe07FENFMol1iC1EcJoHjvIUCqGZAtd9QJiAhghJ88CRR+iFJAWp+4An8ISTgob7gGICFBFazQM+Qu/EpKDpPmCQwJII7eYBH6EwoRQs3DenvpTTeL1P9aU0+zm2+xEyx9J9x3H+gAdT2LSfZciAXwAAAABJRU5ErkJggg==" alt=""></i> profiles.htm — MySpace</b><div class="win-btns"><span>_</span><span>×</span></div></div>
         <div class="win-body">
           <div class="profiles-grid">
             <article class="profile">
@@ -64,7 +66,7 @@
               <div class="mood" data-mood-preview="grey">Mood: —</div>
             </article>
             <article class="profile">
-              <div class="profile-head"><div class="avatar partner" data-avatar="partner">P</div><div><strong style="font-size:18px" data-pname="partner">Partner</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
+              <div class="profile-head"><div class="avatar partner" data-avatar="partner">S</div><div><strong style="font-size:18px" data-pname="partner">Sam</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
               <label>Display name</label><input data-profile="partner" data-field="display_name">
               <label>Mood / status</label><input data-profile="partner" data-field="mood">
               <label>Currently working on</label><input data-profile="partner" data-field="working_on">
@@ -76,10 +78,10 @@
           <div class="friends">
             <h3>Grey's Top Friends</h3>
             <div class="friend-row">
-              <div class="friend"><div class="friend-face" style="background:#111">🐾</div><b>Pancake</b><small>4 • black shorthair<br>Chief supervisor</small></div>
-              <div class="friend"><div class="friend-face" style="background:#b45309">🐾</div><b>Kyoko</b><small>11 • calico Scottish Fold<br>Senior editor</small></div>
-              <div class="friend"><div class="friend-face" style="background:#be185d">🐾</div><b>Coffee</b><small>1 • calico shorthair<br>Chaos intern</small></div>
-              <div class="friend"><div class="friend-face" style="background:#000080">♥</div><b>You Two</b><small>Grey × Partner<br>The main characters</small></div>
+              <div class="friend"><div class="friend-face" style="background:#111"><img class="wicon-friend" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA50lEQVR4nO2YQQ7DIAwEadVD1Qf0/+/LA6rc2iuKECzeTQjNzi0BbNYGB5KSMcYYMzE3pbH1s3zz5+frXbSP9kO4Rwdu2U6KfYciEzAKiYBaBPM2tF8PzsBoHmhHZeVQ+oIy0KocNQd5G9Kvt0pNv4SaAtDKUYpu77tIlYL3AAK6L5T75/+X0NlpCkArjIKIr+kzAEew5+NSqyZI1np87XofqKFafhIjzHmeFULvAWbyivGUANa5ws70VSgsQBV91t51M3AWLGA0YQFHHuRqXDcDKemyMPTfKCuCHe/TaAn2PmCMMeYwfiQAg+0KkyFkAAAAAElFTkSuQmCC" alt=""></div><b>Pancake</b><small>4 • black shorthair<br>Chief supervisor</small></div>
+              <div class="friend"><div class="friend-face" style="background:#b45309"><img class="wicon-friend" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA50lEQVR4nO2YQQ7DIAwEadVD1Qf0/+/LA6rc2iuKECzeTQjNzi0BbNYGB5KSMcYYMzE3pbH1s3zz5+frXbSP9kO4Rwdu2U6KfYciEzAKiYBaBPM2tF8PzsBoHmhHZeVQ+oIy0KocNQd5G9Kvt0pNv4SaAtDKUYpu77tIlYL3AAK6L5T75/+X0NlpCkArjIKIr+kzAEew5+NSqyZI1np87XofqKFafhIjzHmeFULvAWbyivGUANa5ws70VSgsQBV91t51M3AWLGA0YQFHHuRqXDcDKemyMPTfKCuCHe/TaAn2PmCMMeYwfiQAg+0KkyFkAAAAAElFTkSuQmCC" alt=""></div><b>Kyoko</b><small>11 • calico Scottish Fold<br>Senior editor</small></div>
+              <div class="friend"><div class="friend-face" style="background:#be185d"><img class="wicon-friend" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA50lEQVR4nO2YQQ7DIAwEadVD1Qf0/+/LA6rc2iuKECzeTQjNzi0BbNYGB5KSMcYYMzE3pbH1s3zz5+frXbSP9kO4Rwdu2U6KfYciEzAKiYBaBPM2tF8PzsBoHmhHZeVQ+oIy0KocNQd5G9Kvt0pNv4SaAtDKUYpu77tIlYL3AAK6L5T75/+X0NlpCkArjIKIr+kzAEew5+NSqyZI1np87XofqKFafhIjzHmeFULvAWbyivGUANa5ws70VSgsQBV91t51M3AWLGA0YQFHHuRqXDcDKemyMPTfKCuCHe/TaAn2PmCMMeYwfiQAg+0KkyFkAAAAAElFTkSuQmCC" alt=""></div><b>Coffee</b><small>1 • calico shorthair<br>Chaos intern</small></div>
+              <div class="friend"><div class="friend-face" style="background:#000080"><img class="wicon-friend" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABJ0lEQVR4nO2YvRGCQBCFHzZgB1IBEbEJ3WBB0g0JMREVQAdUgIFjIHPC7R+K7Bcyt9y+9/aAAXAcx3GcHZNwC8frfZpfOze36PtJ61+QC0IbUxqR1s85xS6M3XxpnbQ+RLQAyk1D66X1n4gSQN18XietX4I0Qr/I6mHhuqfJ0qHefQIu4NtECWj7zroP9r6rAs7NLcnTbHMRbd8hT7PVt/IxRmjrFGLdBwgJbCWC0jxAHCHO5y4Hs69RACiGKrFKoe07FENFMol1iC1EcJoHjvIUCqGZAtd9QJiAhghJ88CRR+iFJAWp+4An8ISTgob7gGICFBFazQM+Qu/EpKDpPmCQwJII7eYBH6EwoRQs3DenvpTTeL1P9aU0+zm2+xEyx9J9x3H+gAdT2LSfZciAXwAAAABJRU5ErkJggg==" alt=""></div><b>You Two</b><small>Grey × Sam<br>The main characters</small></div>
             </div>
             <p style="margin:8px 0 0;font-size:12px;color:#555">Profile edits save to the shared account and appear on your partner's screen live.</p>
           </div>
@@ -88,14 +90,14 @@
 
       <!-- DIRECTORY -->
       <section class="window">
-        <div class="titlebar"><b><i>🗀</i> directory — All Projects</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7klEQVR4nO2XvRHCMBSDBccWbtIwACvQswEVa6ROQ8UELEGfFRiAhsYeggbaFHHOdmTIO/R1ufhPfnq5CBBCmGZVMqk/N+/h8/Hy4pxmQAgh6Wxr+s5fZsNY5H5tGMsAAHanZ9Z4ioDcTWOUXARFwOO2n73G9tAXzVMPjJFym4yqAZUEAID3PvrOOUfbx7yFzAuoZiGmTaaoIoDVoCnIQjG6Lv4pbVtehcxXwLyAahZi2mQKioDSHzEGi8sDuagHAAUaAAo0XBRoMjBvIfMCFGjGUKDJQIHm15gXYD7QqAKAEtksFhVoSjDfA0L8Ox/ovjYZU2r+vwAAAABJRU5ErkJggg==" alt=""></i> directory — All Projects</b><div class="win-btns"><span>_</span><span>×</span></div></div>
         <div class="win-body">
           <div class="board-tools">
             <h3>+ Add a project</h3>
             <form id="addProjectForm">
               <div class="form-grid">
                 <div><label>Title *</label><input id="pTitle" required placeholder="e.g. Las Vegas art magazine"></div>
-                <div><label>Owner</label><select id="pOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
+                <div><label>Owner</label><select id="pOwner"><option>Grey</option><option>Sam</option><option>Both</option></select></div>
                 <div><label>Tag</label><select id="pTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
                 <div><label>Due date</label><input type="date" id="pDue"></div>
                 <div><label>Starts in</label><select id="pCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
@@ -118,6 +120,7 @@
   <a class="task-btn" href="board.html">Board</a>
   <a class="task-btn" href="shelf.html">Files</a>
   <a class="task-btn" href="phone.html">Phone</a>
+  <a class="task-btn" href="playlists.html">Playlists</a>
   <span class="task-live off" id="taskLive">● OFFLINE</span>
   <button class="task-btn logout" data-logout type="button">Log out</button>
   <div class="clock js-clock">--:--</div>
@@ -135,7 +138,7 @@ function renderProfiles() {
     var prev = document.querySelector('[data-mood-preview="' + k + '"]');
     if (prev) prev.textContent = 'Mood: ' + (p.mood || '—');
     var nm = document.querySelector('[data-pname="' + k + '"]');
-    if (nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Partner');
+    if (nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Sam');
     var av = document.querySelector('[data-avatar="' + k + '"]');
     if (av) {
       if (p.avatar_url) { av.innerHTML = '<img src="' + esc(p.avatar_url) + '" alt="">'; }

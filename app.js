@@ -1,4 +1,4 @@
-/* Shared logic — couples app v2 (multi-page)
+/* Shared logic — couples app v3 (multi-page, chrome/CRT restyle + Playlists)
    Supabase client, auth gate, data fetchers, realtime helper,
    escape/format helpers, storage signed-URL helper, misc UI. */
 var SUPABASE_URL = 'https://nvwefyrbpokbebzbayka.supabase.co';
@@ -9,7 +9,7 @@ var BUCKET = 'project-files';
 var sb = null;
 try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { sb = null; }
 
-var state = { profiles: {}, projects: [], messages: [], files: [] };
+var state = { profiles: {}, projects: [], messages: [], files: [], playlists: [], playlist_tracks: [] };
 var signedUrlCache = {};  // storage_path -> signed URL (session cache)
 var realtimeChannel = null;
 var appEntered = false;
@@ -127,6 +127,21 @@ function fetchMessages() {
       state.messages = res.data || [];
     });
 }
+function fetchPlaylists() {
+  return sb.from('playlists').select('*').order('created_at', { ascending: true })
+    .then(function (res) {
+      if (checkErr(res)) return;
+      state.playlists = res.data || [];
+    });
+}
+function fetchPlaylistTracks() {
+  return sb.from('playlist_tracks').select('*')
+    .order('position', { ascending: true }).order('created_at', { ascending: true })
+    .then(function (res) {
+      if (checkErr(res)) return;
+      state.playlist_tracks = res.data || [];
+    });
+}
 function fetchFiles() {
   return sb.from('files').select('*').order('created_at', { ascending: false })
     .then(function (res) {
@@ -141,6 +156,8 @@ function loadAll(handlers) {
   if (!handlers || handlers.projects) jobs.push(fetchProjects());
   if (!handlers || handlers.messages) jobs.push(fetchMessages());
   if (!handlers || handlers.files) jobs.push(fetchFiles());
+  if (!handlers || handlers.playlists) jobs.push(fetchPlaylists());
+  if (!handlers || handlers.playlist_tracks) jobs.push(fetchPlaylistTracks());
   return Promise.all(jobs).then(function () {
     if (handlers) Object.keys(handlers).forEach(function (k) { handlers[k](); });
   }).catch(function () { showSyncError(true); });
@@ -152,7 +169,7 @@ function subscribeRealtime(handlers) {
   var ch = sb.channel('couples-live-' + location.pathname);
   Object.keys(handlers).forEach(function (table) {
     ch.on('postgres_changes', { event: '*', schema: 'public', table: table }, function () {
-      var fetcher = { profiles: fetchProfiles, projects: fetchProjects, messages: fetchMessages, files: fetchFiles }[table];
+      var fetcher = { profiles: fetchProfiles, projects: fetchProjects, messages: fetchMessages, files: fetchFiles, playlists: fetchPlaylists, playlist_tracks: fetchPlaylistTracks }[table];
       if (fetcher) fetcher().then(function () { handlers[table](); });
     });
   });
@@ -160,6 +177,21 @@ function subscribeRealtime(handlers) {
     if (status === 'SUBSCRIBED') { setLive(true); showSyncError(false); }
     else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') { setLive(false); }
   });
+}
+
+/* ---------- YouTube helpers (playlists) ---------- */
+/* Accepts watch?v=, youtu.be/, shorts/, embed/, live/, or a raw 11-char video ID. */
+function youtubeId(input) {
+  var s = String(input || '').trim();
+  if (/^[A-Za-z0-9_-]{11}$/.test(s)) return s;
+  var m = s.match(/[?&]v=([A-Za-z0-9_-]{11})/) ||
+          s.match(/youtu\.be\/([A-Za-z0-9_-]{11})/) ||
+          s.match(/\/(?:shorts|embed|live|v)\/([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function youtubeEmbedUrl(input) {
+  var id = youtubeId(input);
+  return id ? 'https://www.youtube-nocookie.com/embed/' + id : null;
 }
 
 /* ---------- Storage: signed URLs for the private bucket ---------- */
