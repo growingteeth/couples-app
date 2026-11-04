@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <link rel="icon" href="data:,"/>
 <title>Our Desktop — Directory (Live Sync)</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
@@ -17,7 +17,7 @@
   <section class="window login-window">
     <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ softsignal — grey × sam, private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -35,10 +35,9 @@
     <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
     <div class="top-banner">
       <div>
-        <strong>softsignal ♥ our desktop — grey × sam</strong>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
         <p><b>Directory:</b> your profiles, and every project in one list. Click a project to open its own page — its details, checklist and private file shelf live there.</p>
       </div>
-      <span class="sticker">grey × sam ♡</span>
       <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
     </div>
 
@@ -47,7 +46,6 @@
       <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
       <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
       <a href="phone.html"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
-      <a href="playlists.html"><div class="nav-pic">💿</div><span>Playlists<br>CD Stack</span></a>
     </nav>
 
     <main>
@@ -66,7 +64,7 @@
               <div class="mood" data-mood-preview="grey">Mood: —</div>
             </article>
             <article class="profile">
-              <div class="profile-head"><div class="avatar partner" data-avatar="partner">S</div><div><strong style="font-size:18px" data-pname="partner">Sam</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
+              <div class="profile-head"><div class="avatar partner" data-avatar="partner">P</div><div><strong style="font-size:18px" data-pname="partner">Partner</strong><div style="font-size:12px;color:#555">Your favourite person</div><div style="font-size:12px">★ Co-owner of this desktop</div></div></div>
               <label>Display name</label><input data-profile="partner" data-field="display_name">
               <label>Mood / status</label><input data-profile="partner" data-field="mood">
               <label>Currently working on</label><input data-profile="partner" data-field="working_on">
@@ -81,7 +79,7 @@
               <div class="friend"><div class="friend-face" style="background:#111">🐾</div><b>Pancake</b><small>4 • black shorthair<br>Chief supervisor</small></div>
               <div class="friend"><div class="friend-face" style="background:#b45309">🐾</div><b>Kyoko</b><small>11 • calico Scottish Fold<br>Senior editor</small></div>
               <div class="friend"><div class="friend-face" style="background:#be185d">🐾</div><b>Coffee</b><small>1 • calico shorthair<br>Chaos intern</small></div>
-              <div class="friend"><div class="friend-face" style="background:#000080">♥</div><b>You Two</b><small>Grey × Sam<br>The main characters</small></div>
+              <div class="friend"><div class="friend-face" style="background:#000080">♥</div><b>You Two</b><small>Grey × Partner<br>The main characters</small></div>
             </div>
             <p style="margin:8px 0 0;font-size:12px;color:#555">Profile edits save to the shared account and appear on your partner's screen live.</p>
           </div>
@@ -97,7 +95,7 @@
             <form id="addProjectForm">
               <div class="form-grid">
                 <div><label>Title *</label><input id="pTitle" required placeholder="e.g. Las Vegas art magazine"></div>
-                <div><label>Owner</label><select id="pOwner"><option>Grey</option><option>Sam</option><option>Both</option></select></div>
+                <div><label>Owner</label><select id="pOwner"><option>Grey</option><option>Partner</option><option>Both</option></select></div>
                 <div><label>Tag</label><select id="pTag"><option>Writing</option><option>Art</option><option>Film</option><option>Mixed</option><option>Life / Home</option></select></div>
                 <div><label>Due date</label><input type="date" id="pDue"></div>
                 <div><label>Starts in</label><select id="pCol"><option>Ideas</option><option>In Progress</option><option>Needs Review</option><option>Done</option></select></div>
@@ -120,7 +118,6 @@
   <a class="task-btn" href="board.html">Board</a>
   <a class="task-btn" href="shelf.html">Files</a>
   <a class="task-btn" href="phone.html">Phone</a>
-  <a class="task-btn" href="playlists.html">Playlists</a>
   <span class="task-live off" id="taskLive">● OFFLINE</span>
   <button class="task-btn logout" data-logout type="button">Log out</button>
   <div class="clock js-clock">--:--</div>
@@ -138,7 +135,7 @@ function renderProfiles() {
     var prev = document.querySelector('[data-mood-preview="' + k + '"]');
     if (prev) prev.textContent = 'Mood: ' + (p.mood || '—');
     var nm = document.querySelector('[data-pname="' + k + '"]');
-    if (nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Sam');
+    if (nm) nm.textContent = p.display_name || (k === 'grey' ? 'Grey' : 'Partner');
     var av = document.querySelector('[data-avatar="' + k + '"]');
     if (av) {
       if (p.avatar_url) { av.innerHTML = '<img src="' + esc(p.avatar_url) + '" alt="">'; }

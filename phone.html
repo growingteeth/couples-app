@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <link rel="icon" href="data:,"/>
 <title>Our Desktop — Phone Notes (Live Sync)</title>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Tahoma&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
@@ -17,7 +17,7 @@
   <section class="window login-window">
     <div class="titlebar"><b><i>🔑</i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
     <div class="win-body">
-      <p style="margin:0 0 10px"><b>♥ softsignal — grey × sam, private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <p style="margin:0 0 10px"><b>♥ Grey × Partner — private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
       <div class="login-err" id="loginErr" hidden></div>
       <form id="loginForm" style="margin-top:10px">
         <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
@@ -35,10 +35,9 @@
     <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
     <div class="top-banner">
       <div>
-        <strong>softsignal ♥ our desktop — grey × sam</strong>
+        <strong>♥ OUR DESKTOP — GREY × PARTNER</strong>
         <p><b>Phone notes:</b> your shared 2000s inbox. Leave a note, it lands on both phones live.</p>
       </div>
-      <span class="sticker">grey × sam ♡</span>
       <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
     </div>
 
@@ -47,7 +46,6 @@
       <a href="board.html"><div class="nav-pic">📌</div><span>Projects<br>Board</span></a>
       <a href="shelf.html"><div class="nav-pic">🗂️</div><span>File<br>Shelf</span></a>
       <a href="phone.html" aria-current="page"><div class="nav-pic">📱</div><span>Phone<br>Notes</span></a>
-      <a href="playlists.html"><div class="nav-pic">💿</div><span>Playlists<br>CD Stack</span></a>
     </nav>
 
     <main>
@@ -57,21 +55,18 @@
         <div class="win-body">
           <div class="phone-wrap"><div class="phone">
             <div class="speaker"></div>
-            <div class="handset-brand">✆ &nbsp;O U R&nbsp; P H O N E&nbsp; ✆</div>
-            <div class="side-icons" aria-hidden="true"><span>♪</span><span>✉</span><span>▦</span><span>☎</span></div>
             <div class="screen">
               <div class="screen-head"><span>✉ INBOX</span><span class="js-clock">--:--</span></div>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><small><b id="unreadCount">0 new</b></small><button class="btn small" id="markRead" type="button">Mark all read</button></div>
               <div class="thread" id="thread"></div>
               <form class="phone-form" id="msgForm">
                 <label style="font-size:12px;font-weight:700">FROM
-                  <select id="msgFrom"><option value="Grey">Grey</option><option value="Sam">Sam</option></select>
+                  <select id="msgFrom"><option value="Grey">Grey</option><option value="Partner">Partner</option></select>
                 </label>
                 <textarea id="msgText" rows="2" placeholder="miss u, check this draft… (T9 vibes encouraged)" required></textarea>
                 <button class="btn primary" type="submit">SEND TXT ➤</button>
               </form>
             </div>
-            <div class="softkeys" aria-hidden="true"><span class="softkey"></span><span class="softkey navdisc">◎</span><span class="softkey"></span></div>
             <div class="keys" aria-hidden="true"><div>1</div><div>2 abc</div><div>3 def</div><div>4 ghi</div><div>5 jkl</div><div>6 mno</div><div>7 pqrs</div><div>8 tuv</div><div>9 wxyz</div><div>*</div><div>0 +</div><div>#</div></div>
           </div></div>
           <p style="font-size:12px;text-align:center;color:#333">Notes sync live — leave one here and it pops up on your partner's phone too.</p>
@@ -89,7 +84,6 @@
   <a class="task-btn" href="board.html">Board</a>
   <a class="task-btn" href="shelf.html">Files</a>
   <a class="task-btn" href="phone.html">Phone</a>
-  <a class="task-btn" href="playlists.html">Playlists</a>
   <span class="task-live off" id="taskLive">● OFFLINE</span>
   <button class="task-btn logout" data-logout type="button">Log out</button>
   <div class="clock js-clock">--:--</div>
@@ -103,7 +97,7 @@ function renderSenderLabels() {
   var g = state.profiles.grey && state.profiles.grey.display_name;
   var p = state.profiles.partner && state.profiles.partner.display_name;
   sel.options[0].textContent = g || 'Grey';
-  sel.options[1].textContent = p || 'Sam';
+  sel.options[1].textContent = p || 'Partner';
 }
 function renderMessages() {
   renderSenderLabels();

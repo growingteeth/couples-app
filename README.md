@@ -1,70 +1,50 @@
-# Couples App v4 — "SoftSignal" redesign (GitHub Pages deploy)
+# Couples App v2 — separate pages (GitHub Pages deploy)
 
-What's new in v4:
-- Full visual redesign matching the **SoftSignal** personal-homepage skin
-  (the Pinterest pin Grey sent, 2026-11-03): a Y2K Korean blog-skin /
-  retro-tech device panel.
-  - Dark near-black plum backdrop with a faint blueprint grid
-  - The whole app now sits inside one big **cream-beige device console**
-    with rounded corners, a green waveform/EQ strip across the top,
-    and the lowercase `softsignal` nameplate
-  - **Sage / olive green** (#6b876f) and deep-forest LCD modules —
-    the nav is now a dark-green menu panel with pink indicator dots,
-    moods/status show on dark-green LCD readouts
-  - **Hot-pink sticker accents** (the slanted `grey × sam ♡` sticker,
-    the pink sync stamp, pink file/note highlights) + **lime** highlights
-  - Round metal **knobs/dials** for window buttons, playlist controls,
-    and the phone's nav disc; the Phone is now a sage charm-handset
-    with a hanging loop, like the pin's side device
-  - New type: Archivo Black headlines, Space Grotesk body, Space Mono
-    for the tiny labels/readouts (Permanent Marker stays on the CDs)
-- No functional changes: `app.js` is identical to v3, all Supabase
-  tables, login, realtime sync, files, and playlists work as before.
-  This is a drop-in replacement — mostly a new `styles.css`, plus the
-  new fonts and nameplate text in each page.
+Same app, restructured into separate pages that share one login and one
+Supabase backend. **Everything you two already added is safe**: projects,
+notes, profiles and uploaded files live in Supabase (database + storage),
+not in these HTML files — replacing the site files does not delete your data.
 
-## Deploy — replace the files in GitHub
+## Files in this package
+- `index.html` — Directory/home: profiles + a directory of all projects
+- `board.html` — the full project board (Ideas / In Progress / Needs Review / Done)
+- `project.html` — one project's own page (details, checklist, its own file shelf)
+- `shelf.html` — all files across all projects, with filters + search
+- `phone.html` — the 2000s phone / leave-a-note page
+- `styles.css`, `app.js` — shared styling and shared sync/login code (required by every page)
 
-In Chrome (not the GitHub mobile app): go to the existing repo
-(**growingteeth / couples-app**) > **Add file > Upload files**, and upload
-every website file below, replacing the old ones, then **Commit changes**.
-All files must land in the repo **root**, next to each other — not in a folder.
+## Deploy steps
+Use mobile **Chrome** on github.com (the GitHub app can't upload files or
+change Pages settings) — same flow as the first version.
 
-Must-upload checklist:
-- [ ] `index.html`  (Directory / home)
-- [ ] `board.html`  (Projects board)
-- [ ] `project.html` (single project + its file shelf)
-- [ ] `shelf.html`   (all files)
-- [ ] `phone.html`   (phone notes — new sage charm-handset look)
-- [ ] `playlists.html` (CD stack + CRT player)
-- [ ] **`app.js` — upload it too** (unchanged from v3, but uploading it
-      again is harmless and avoids the old v2 mistake where a missing
-      `app.js` made login silently do nothing)
-- [ ] **`styles.css` — THE redesign lives here.** Without the new copy
-      the site will still look like v3.
-- [ ] `README.md` (optional — this file; harmless either way)
+1. Download and unzip `couples-app-site-v2.zip` with your phone's Files app.
+2. Open your existing repo: **growingteeth / couples-app**
+3. **Add file > Upload files**: upload ALL files from this package
+   (`index.html`, `board.html`, `project.html`, `shelf.html`, `phone.html`,
+   `styles.css`, `app.js`, and `README.md` too if you like).
+   - Uploading the new `index.html` **replaces** the old single-file one — that's intended.
+   - Commit changes.
+4. Pages settings: **unchanged** — Settings > Pages should still be
+   "Deploy from a branch", branch `main`, folder `/ (root)`. Nothing to redo.
+5. Wait a minute or two, then visit your site:
+   **https://growingteeth.github.io/couples-app/**
 
-Do NOT upload `playlists-schema.sql` or `rename-to-sam.sql` to GitHub —
-those were one-time Supabase SQL steps, already done for v3.
+## Your page URLs
+- Directory: `https://growingteeth.github.io/couples-app/`
+- Board: `https://growingteeth.github.io/couples-app/board.html`
+- A project: `https://growingteeth.github.io/couples-app/project.html?id=<project id>` (open projects from the directory or board — they'll link you there)
+- File shelf: `https://growingteeth.github.io/couples-app/shelf.html`
+- Phone: `https://growingteeth.github.io/couples-app/phone.html`
 
-Repo **Settings > Pages** stays as it was: Deploy from a branch, `main`, `/ (root)`.
+Your login carries across all pages on the site — log in once per device.
 
-## URLs (unchanged)
+## Supabase setting (one time)
+In Supabase: **Authentication > URL Configuration**
+- **Site URL:** `https://growingteeth.github.io/couples-app/`
+- **Redirect URLs:** add `https://growingteeth.github.io/couples-app/**`
+- Save. (This makes auth emails land on the real app instead of localhost.)
 
-- Home / Directory: https://growingteeth.github.io/couples-app/
-- Board:    https://growingteeth.github.io/couples-app/board.html
-- Project:  https://growingteeth.github.io/couples-app/project.html?id=…
-- Files:    https://growingteeth.github.io/couples-app/shelf.html
-- Phone:    https://growingteeth.github.io/couples-app/phone.html
-- Playlists: https://growingteeth.github.io/couples-app/playlists.html
-
-Give Pages a minute after committing, then open the site in a **fresh tab**
-(close old tabs first — phones love serving the cached old page). Log in as
-usual; your login carries across all the pages.
-
-## Your existing data is NOT affected
-
-Uploading these files only replaces the app's code and styling. Everything
-you and Sam have added — projects, cards, notes, files, profiles,
-playlists — lives in Supabase (database + storage bucket), not in these
-files. It will all be there when you log in.
+## Troubleshooting
+- **404 on a page**: make sure that file is at the repo root (not in a subfolder) and the name matches exactly — Pages URLs are case-sensitive.
+- **Stuck on the login screen / "could not load"**: check your connection and reload; the app needs the Supabase library from a CDN.
+- **A page looks unstyled**: `styles.css` must be in the repo root next to the HTML files.
