@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<link rel="icon" href="data:,"/>
+<title>Our Desktop — Poetry Library (Live Sync)</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div class="login-wrap" id="loginGate">
+  <section class="window login-window">
+    <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABcElEQVR4nO2YPQ6DMAyFTdWNG2RH6h3YegdOyR269Q5I3XODznSogtI0TmKKbSryTSUN8F5s5weASqVS0aSh3mCMmcM2ay35OVtxLu3ohD/Gy9d/3QAzgI6RohcaY+aY8JBumMRNnHIdSsUDvKMTSzFOkgYo4h3SJoprwKftb0uaPO9X0REPQSOAjb4vPnYNIBuFbA34xMSm2iUgGdgjxzKAFaxmIaMGrLVNN0xf7aHYmHjJBW3VNKo9dfokUwiLAobrS138fiFbAxQTj/GymJCKUnGepnejnyPfDdPym3uN2Pw84EZeygTLgyVNsCxkTqxETbCtxFImWLcSEibY90LcJkQ2c5wmxHajFBMUc+IHkdQUGwovmXpVTlIxEzF2awCgPE1yJtROZDlhbX9rsNTyUYuAIyaOUhPqZ2JflD87laaYegQca2tiNwYA0iawmlFPIZ81H852ZQAArwk1QWtxhSz9uX5T/nLkK5XKwXgBmXTjP+9yZTMAAAAASUVORK5CYII=" alt=""></i> login.exe — Our Desktop (Live Sync)</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+    <div class="win-body">
+      <p style="margin:0 0 10px"><b>♥ softsignal — grey × sam, private desktop.</b><br>Log in with the account made for you in Supabase. There's no sign-up here — just you two.</p>
+      <div class="login-err" id="loginErr" hidden></div>
+      <form id="loginForm" style="margin-top:10px">
+        <div><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="you@example.com"></div>
+        <div><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+        <button class="btn primary" type="submit" id="loginBtn">Log in ➤</button>
+      </form>
+      <p class="login-note" style="margin-top:10px">Once you're in, everything syncs live between your devices — move a card or leave a note and it shows up on the other side.</p>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div class="desktop" id="appRoot" hidden>
+  <div class="page-shell">
+    <div class="error-banner" id="syncError" hidden>⚠ Can't reach the sync server right now — your changes may not save or appear for your partner. Check your connection and reload the page.</div>
+    <div class="top-banner">
+      <div>
+        <strong>softsignal ♥ our desktop — grey × sam</strong>
+        <p><b>Poetry Library:</b> books of poems you two write for each other. Start a book, pick it off the shelf, and fill it — every poem syncs live to both of you.</p>
+      </div>
+      <span class="sticker">grey × sam ♡</span>
+      <div class="top-actions"><span class="sync-pill connecting" id="syncPill">● CONNECTING…</span></div>
+    </div>
+
+    <nav class="topnav" aria-label="Pages">
+      <a href="index.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7klEQVR4nO2XvRHCMBSDBccWbtIwACvQswEVa6ROQ8UELEGfFRiAhsYeggbaFHHOdmTIO/R1ufhPfnq5CBBCmGZVMqk/N+/h8/Hy4pxmQAgh6Wxr+s5fZsNY5H5tGMsAAHanZ9Z4ioDcTWOUXARFwOO2n73G9tAXzVMPjJFym4yqAZUEAID3PvrOOUfbx7yFzAuoZiGmTaaoIoDVoCnIQjG6Lv4pbVtehcxXwLyAahZi2mQKioDSHzEGi8sDuagHAAUaAAo0XBRoMjBvIfMCFGjGUKDJQIHm15gXYD7QqAKAEtksFhVoSjDfA0L8Ox/ovjYZU2r+vwAAAABJRU5ErkJggg==" alt=""></div><span>Directory<br>Home</span></a>
+      <a href="board.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAA7ElEQVR4nO2ZwQ3DIAxFadUpyCK55JRFugliky7SUy9ZBNZIT63SiEaBb2RZ+u8URRj4tj+KiHOEQFwkJ/PerzXjc87w+ld0Am1uPSZ9vpbv8zyNf99J0CTgbKtsNzpP44+Io3lqWqtbC5WyLJn5D1AL3Xf7eSzlcb3inetUgaNMS1eBp1BL2Uux+3Y6i8gxmlKC4odhaI4130IUoA0FaGNegOjXaIyxanwIAV6TFdgikdFazFfAvACaWBuaWBvzAmhibWhibcwLoIm1oYm1oQBtzAsQMTFyOYsCC2i9FpcCEoD8G5DCvAcIAXkDjro1Bj1woJwAAAAASUVORK5CYII=" alt=""></div><span>Projects<br>Board</span></a>
+      <a href="shelf.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABIUlEQVR4nO2ZLw7CMBTGO4LiAks6M8MBsIQb4EBgCYJrLLsGgnACHAKBgoDkAJiZNdkFsEORQPrWP6Rrafd+8lvF96Xf28syQhAEQZAuE0EipbS2bUQVxtiX554rI6boix4ytrblQwqlG1AP+wbe1HUG6lGUGzXzC97fAAZwjdIM/EPXmwj7Bs63qS0fUhZzeA8IA5yOh1bMmEQ6A1kG7wCb5HnzDIY9A58kSdL4rCzL1s7JUA5ACCH3bcppo1XBadc45rRxVXHaYLLntOdlpmPJ/wphANdozQDUdwio7xC6fYdQDqD6ZjB9TkZ3KhTEHhguU0577ApOM70vRHhfIQzgGq0ZgPoOYXpfiMA94BrvA0grJPqc+wfw/wCCIEi3eQHuXFgqctmhhAAAAABJRU5ErkJggg==" alt=""></div><span>File<br>Shelf</span></a>
+      <a href="phone.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABcUlEQVR4nO2YMdKCMBCF389QMWPNkKOk8AoWFt6AQ3EDCwuvYOFRYKidsXL0rzKjMSGbkIAM+5WBhPeS3WwCwDAMw6yZv6GHQojXVEJctG1r1JpNLSQ2OeWl4+mcVMRhv8O1LD/aZN/jeDrjsN8N9iUZUB9JhS5etUnCN8kGACCvCp/XnTy6u1G84lqWkH0/OMbic2A2A5fnJso4XiE0llii35lkBS7PjVG8K8Zd8Q8kNmAT/o7NhNpGXSQJId9QyasCsnPPtrFvUC8LPsK32e1TiLZFP7o7aRwvA/qgeVV4z7YufCxeBr7KfdcDJc1AbOEKUhKbzioArVJus1sy8QDRQEi5Ty1cETWJpxCsE60OzCEeWMthzlXuYx+zfSDfyKTl1gTQi04KyEmsTOhtc+O1C/2CYJ11JPEvwz+25mZwBUIQQrzqurY+b5rGOpshLH4FFm8geClTJHhIaI06TscsbKH/XjmEYhJzd2IYhpmGf2yyfUqYVKJHAAAAAElFTkSuQmCC" alt=""></div><span>Phone<br>Notes</span></a>
+      <a href="playlists.html"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAB9ElEQVR4nO2ZsU7DMBCGD8TePVbnij5AR6YIlYGJ1+hQMVWIsUKdqg59jU4MRR27hQcAMUYo2XkCmBw5h+3cOZdGCH9SpcZK7P/3nc+KAxCJRCKRFpxJd5gkyXfTPWVZio0r1hFFOEbCSOsObMLfn56d918+3P5qa2Mk+EEs3CfaBTYTYiTIgCk+RDjGNMI1cc4dTFo87oe7llhudedSwm3oaFAjQY5ASJVpA3U8dgp1Nft5mkGeZvDy+sh6jmSg69TJ06x2rU1QosCOgDRYPJdGA13Ovk88NQoX1MH2owHcfHxRb7fuuOYktJ15jTcC2P1+NKh+PmzizXaueF8UvLVWP7jeHb0DmJExxRdFUf1XSlX/OZVmOlkCgHtfIKeQDx2R+7urqq0oCpit5rVrbWI6WbLLpYtOqhAWDwAwW81rEZGi9zLalmjAhlIKtotNrW272NQWshQii1iz3h2rhayUEqlCTZDKqBZHxaxGmJASCuAuo94UCn1XdZkNnXmfDtEUMsEmxsNDJ+M0LmLt3pcWXdC0A2v+Rxk9dRSosw8QEIFQE2+f16T7zMpDgWxA8jxTcjy2qNC9AcBfiSg13wY7hczOpdZEqHgAwbNRSjRwBHC+n+xs1MT2uucyMx4erIu0l9NpzJ/9PoA59ReaSCQS6ZcfJbvfEyGFJJQAAAAASUVORK5CYII=" alt=""></div><span>Playlists<br>CD Stack</span></a>
+          <a href="poetry.html" aria-current="page"><div class="nav-pic"><img class="wicon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABKUlEQVR4nO2Yrw7CMBDGD4LAYlfHMHM81QkegCBIliUThAdA7KlwGIbrLBYHqmTZH9quhHbk+6mta3v3Zf1ylxIBAAAAwB+Tvg9RFD1/mYgJVVW18p36SOSbaAXM44VTAGZ2Wq+LPzPd6HY9D0rgcDyRlPLjHCEEXeL9+z0pc5JSkhBCu///H6HQGb0AYw8oDseT0bzddtMay7LMNpwWawFdiZmSpmnneFEUg/cc/RGCgG+SlLn1mmBMnJQ5MTMlhZ0IbTM3jxf0KO9OlbjPvApVcevVVz2r+ESBN3Oq3dC1HU2CENBM2kZEEAJcCMbEdXSeqRNEJXZh9EcIAnwDE9sAE3cAAb4x9sBytR4UgJmN7neGYtRO++ZTO639A2pxqIzeAwAAAJx4ATKmZIWhYi/EAAAAAElFTkSuQmCC" alt=""></div><span>Poetry<br>Library</span></a>
+    </nav>
+
+    <main>
+      <!-- LIBRARY -->
+      <section class="window">
+        <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABKUlEQVR4nO2Yrw7CMBDGD4LAYlfHMHM81QkegCBIliUThAdA7KlwGIbrLBYHqmTZH9quhHbk+6mta3v3Zf1ylxIBAAAAwB+Tvg9RFD1/mYgJVVW18p36SOSbaAXM44VTAGZ2Wq+LPzPd6HY9D0rgcDyRlPLjHCEEXeL9+z0pc5JSkhBCu///H6HQGb0AYw8oDseT0bzddtMay7LMNpwWawFdiZmSpmnneFEUg/cc/RGCgG+SlLn1mmBMnJQ5MTMlhZ0IbTM3jxf0KO9OlbjPvApVcevVVz2r+ESBN3Oq3dC1HU2CENBM2kZEEAJcCMbEdXSeqRNEJXZh9EcIAnwDE9sAE3cAAb4x9sBytR4UgJmN7neGYtRO++ZTO639A2pxqIzeAwAAAJx4ATKmZIWhYi/EAAAAAElFTkSuQmCC" alt=""></i> library.exe — Poetry Library</b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <form class="board-tools" id="bookForm">
+            <h3>Start a new poetry book</h3>
+            <div class="form-grid">
+              <div style="grid-column:span 2"><label>Book title<input id="bkTitle" required placeholder="e.g. Poems for a Las Vegas Winter"></label></div>
+              <div><label>Author
+                <select id="bkAuthor"><option value="Grey">Grey</option><option value="Sam">Sam</option><option value="Both" selected>Both</option></select></label></div>
+              <div><label>Note (optional)<input id="bkNote" placeholder="what this book is for…"></label></div>
+              <div class="full"><button class="btn primary" type="submit">Put it on the shelf ➤</button></div>
+            </div>
+          </form>
+          <div class="book-grid" id="bookGrid"></div>
+          <div class="empty" id="noBooks" style="margin-top:10px">No books on the shelf yet — start your first one above.</div>
+        </div>
+      </section>
+
+      <!-- OPEN BOOK -->
+      <section class="window" id="bookWindow" hidden>
+        <div class="titlebar"><b><i><img class="wicon-sm" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABKUlEQVR4nO2Yrw7CMBDGD4LAYlfHMHM81QkegCBIliUThAdA7KlwGIbrLBYHqmTZH9quhHbk+6mta3v3Zf1ylxIBAAAAwB+Tvg9RFD1/mYgJVVW18p36SOSbaAXM44VTAGZ2Wq+LPzPd6HY9D0rgcDyRlPLjHCEEXeL9+z0pc5JSkhBCu///H6HQGb0AYw8oDseT0bzddtMay7LMNpwWawFdiZmSpmnneFEUg/cc/RGCgG+SlLn1mmBMnJQ5MTMlhZ0IbTM3jxf0KO9OlbjPvApVcevVVz2r+ESBN3Oq3dC1HU2CENBM2kZEEAJcCMbEdXSeqRNEJXZh9EcIAnwDE9sAE3cAAb4x9sBytR4UgJmN7neGYtRO++ZTO639A2pxqIzeAwAAAJx4ATKmZIWhYi/EAAAAAElFTkSuQmCC" alt=""></i> <span id="openBookBar">book</span></b><div class="win-btns"><span>_</span><span>×</span></div></div>
+        <div class="win-body">
+          <div class="open-book-head">
+            <div>
+              <div class="open-book-title" id="obTitle"></div>
+              <div class="poem-meta" id="obMeta" style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#4a5044"></div>
+              <p class="pl-note" id="obNote"></p>
+            </div>
+            <button class="btn small danger" id="delBook" type="button">Delete book</button>
+          </div>
+          <p class="pl-note" style="margin-top:0">Deleting a book deletes every poem in it. No undo.</p>
+          <div id="poemList"></div>
+          <div class="empty" id="noPoems">No poems in this book yet — write the first one below.</div>
+
+          <form class="board-tools poem-editor" id="poemForm" style="margin-top:12px">
+            <h3 id="editorHead">Write a poem</h3>
+            <div class="form-grid">
+              <div style="grid-column:span 2"><label>Poem title<input id="pmTitle" placeholder="give it a title (or leave untitled)"></label></div>
+              <div><label>Written by
+                <select id="pmAuthor"><option value="Grey">Grey</option><option value="Sam">Sam</option></select></label></div>
+              <div class="full"><label>The poem<textarea id="pmBody" required placeholder="type it the way you want it to read — line breaks are kept exactly"></textarea></label></div>
+              <div class="full" style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn primary" type="submit" id="poemSaveBtn">Add poem to this book ➤</button>
+                <button class="btn" type="button" id="cancelEdit" hidden>Cancel edit</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+</main>
+    <p class="foot-note">Made for two • Live sync edition • Directory</p>
+  </div>
+</div>
+
+<footer class="taskbar" id="taskbar" hidden>
+  <a class="start" href="index.html">⊞ start</a>
+  <a class="task-btn" href="index.html">Directory</a>
+  <a class="task-btn" href="board.html">Board</a>
+  <a class="task-btn" href="shelf.html">Files</a>
+  <a class="task-btn" href="phone.html">Phone</a>
+  <a class="task-btn" href="playlists.html">Playlists</a>
+  <a class="task-btn" href="poetry.html">Poetry</a>
+  <span class="task-live off" id="taskLive">● OFFLINE</span>
+  <button class="task-btn logout" data-logout type="button">Log out</button>
+  <div class="clock js-clock">--:--</div>
+</footer>
+
+<div id="toast" role="status" style="position:fixed;left:50%;transform:translateX(-50%);bottom:56px;background:#ffffcc;border:2px solid #000;padding:8px 12px;font-weight:700;box-shadow:3px 3px 0 rgba(0,0,0,.4);display:none;z-index:99"></div>
+
+<script>
+var selBookId = null;
+var editingPoemId = null;
+
+function poemsOf(bookId) { return state.poems.filter(function (p) { return p.book_id === bookId; }); }
+function authorName(v) {
+  if (v === 'Grey') return (state.profiles.grey && state.profiles.grey.display_name) || 'Grey';
+  if (v === 'Sam' || v === 'Partner') return (state.profiles.partner && state.profiles.partner.display_name) || 'Sam';
+  return v || 'Both';
+}
+function selectedBook() { return state.poetry_books.find(function (b) { return b.id === selBookId; }) || null; }
+function resetEditor() {
+  editingPoemId = null;
+  var f = $('poemForm'); if (f) f.reset();
+  $('editorHead').textContent = 'Write a poem';
+  $('poemSaveBtn').textContent = 'Add poem to this book ➤';
+  $('cancelEdit').hidden = true;
+}
+function renderLibrary() {
+  var grid = $('bookGrid'); grid.innerHTML = '';
+  $('noBooks').style.display = state.poetry_books.length ? 'none' : '';
+  state.poetry_books.forEach(function (b, i) {
+    var n = poemsOf(b.id).length;
+    var card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'book-card c' + (i % 4) + (b.id === selBookId ? ' selected' : '');
+    card.setAttribute('aria-label', 'Open book: ' + b.title);
+    card.innerHTML = '<span class="bk-title">' + esc(b.title) + '</span>' +
+      '<span class="bk-author">by ' + esc(authorName(b.author)) + '</span>' +
+      '<span class="bk-count">' + n + (n === 1 ? ' poem' : ' poems') + ' • ' + fmtDate(b.created_at) + '</span>';
+    card.onclick = function () { selBookId = b.id; resetEditor(); renderPoetry(); $('bookWindow').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    grid.appendChild(card);
+  });
+}
+function renderBook() {
+  var b = selectedBook();
+  $('bookWindow').hidden = !b;
+  if (!b) return;
+  $('openBookBar').textContent = b.title;
+  $('obTitle').textContent = b.title;
+  var poems = poemsOf(b.id);
+  $('obMeta').textContent = 'by ' + authorName(b.author) + ' • ' + poems.length + (poems.length === 1 ? ' poem' : ' poems') + ' • started ' + fmtDate(b.created_at);
+  $('obNote').textContent = b.note || '';
+  $('obNote').style.display = b.note ? '' : 'none';
+  $('noPoems').style.display = poems.length ? 'none' : '';
+  var list = $('poemList'); list.innerHTML = '';
+  poems.forEach(function (p) {
+    var card = document.createElement('article');
+    card.className = 'poem-card';
+    card.innerHTML = '<h4>' + esc(p.title || '(untitled)') + '</h4>' +
+      '<div class="poem-meta">by ' + esc(authorName(p.author)) + ' • ' + fmtTime(p.created_at) + '</div>' +
+      '<div class="poem-body">' + esc(p.body) + '</div>' +
+      '<div class="card-actions"><button class="btn small" type="button" data-editpoem="' + p.id + '">Edit</button>' +
+      '<button class="btn small danger" type="button" data-delpoem="' + p.id + '">Delete</button></div>';
+    list.appendChild(card);
+  });
+  list.querySelectorAll('[data-editpoem]').forEach(function (btn) {
+    btn.onclick = function () {
+      var p = state.poems.find(function (x) { return x.id === btn.dataset.editpoem; });
+      if (!p) return;
+      editingPoemId = p.id;
+      $('pmTitle').value = p.title || '';
+      $('pmAuthor').value = (p.author === 'Sam' || p.author === 'Partner') ? 'Sam' : 'Grey';
+      $('pmBody').value = p.body || '';
+      $('editorHead').textContent = 'Editing: ' + (p.title || '(untitled)');
+      $('poemSaveBtn').textContent = 'Save changes ➤';
+      $('cancelEdit').hidden = false;
+      $('poemForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('pmBody').focus();
+    };
+  });
+  list.querySelectorAll('[data-delpoem]').forEach(function (btn) {
+    btn.onclick = function () {
+      armDelete(btn, function () {
+        sb.from('poems').delete().eq('id', btn.dataset.delpoem).then(function (res) {
+          if (checkErr(res)) return;
+          if (editingPoemId === btn.dataset.delpoem) resetEditor();
+          fetchPoems().then(renderPoetry);
+          toast('Poem removed');
+        });
+      });
+    };
+  });
+}
+function renderPoetry() { renderLibrary(); renderBook(); }
+
+$('bookForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var title = $('bkTitle').value.trim(); if (!title) return;
+  sb.from('poetry_books').insert({ title: title, author: $('bkAuthor').value, note: $('bkNote').value.trim() })
+    .then(function (res) {
+      if (checkErr(res)) return;
+      e.target.reset();
+      fetchPoetryBooks().then(function () {
+        var last = state.poetry_books[state.poetry_books.length - 1];
+        if (last) selBookId = last.id;
+        resetEditor(); renderPoetry();
+        toast('Book on the shelf ✓');
+      });
+    });
+});
+$('delBook').onclick = function () {
+  var b = selectedBook(); if (!b) return;
+  armDelete($('delBook'), function () {
+    sb.from('poetry_books').delete().eq('id', b.id).then(function (res) {
+      if (checkErr(res)) return;
+      selBookId = null; resetEditor();
+      Promise.all([fetchPoetryBooks(), fetchPoems()]).then(renderPoetry);
+      toast('Book deleted');
+    });
+  });
+};
+$('poemForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var b = selectedBook(); if (!b) return;
+  var body = $('pmBody').value; if (!body.trim()) return;
+  var title = $('pmTitle').value.trim();
+  var author = $('pmAuthor').value;
+  if (editingPoemId) {
+    sb.from('poems').update({ title: title, body: body, author: author, updated_at: new Date().toISOString() }).eq('id', editingPoemId)
+      .then(function (res) {
+        if (checkErr(res)) return;
+        resetEditor();
+        fetchPoems().then(renderPoetry);
+        toast('Poem updated ✓');
+      });
+  } else {
+    sb.from('poems').insert({ book_id: b.id, title: title, body: body, author: author, position: poemsOf(b.id).length })
+      .then(function (res) {
+        if (checkErr(res)) return;
+        resetEditor();
+        fetchPoems().then(renderPoetry);
+        toast('Poem added ✓');
+      });
+  }
+});
+$('cancelEdit').onclick = function () { resetEditor(); };
+
+window.pageInit = function () {
+  var q = new URLSearchParams(location.search).get('book');
+  if (q) selBookId = q;
+  var handlers = { poetry_books: renderPoetry, poems: renderPoetry, profiles: renderPoetry };
+  loadAll(handlers).then(function () { subscribeRealtime(handlers); });
+};
+</script>
+</body>
+</html>
