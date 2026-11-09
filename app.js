@@ -1,4 +1,4 @@
-/* Shared logic — couples app v6 (multi-page, SoftSignal + Win3.1 icons + Poetry)
+/* Shared logic — couples app v7 (multi-page, SoftSignal + Win3.1 icons + Poetry + Daily Tasks)
    Supabase client, auth gate, data fetchers, realtime helper,
    escape/format helpers, storage signed-URL helper, misc UI. */
 var SUPABASE_URL = 'https://nvwefyrbpokbebzbayka.supabase.co';
@@ -9,7 +9,7 @@ var BUCKET = 'project-files';
 var sb = null;
 try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { sb = null; }
 
-var state = { profiles: {}, projects: [], messages: [], files: [], playlists: [], playlist_tracks: [], poetry_books: [], poems: [] };
+var state = { profiles: {}, projects: [], messages: [], files: [], playlists: [], playlist_tracks: [], poetry_books: [], poems: [], daily_tasks: [] };
 var signedUrlCache = {};  // storage_path -> signed URL (session cache)
 var realtimeChannel = null;
 var appEntered = false;
@@ -156,6 +156,15 @@ function fetchPoetryBooks() {
       state.poetry_books = res.data || [];
     });
 }
+function fetchDailyTasks() {
+  return sb.from('daily_tasks').select('*')
+    .order('task_date', { ascending: true }).order('due_time', { ascending: true, nullsFirst: false })
+    .order('position', { ascending: true }).order('created_at', { ascending: true })
+    .then(function (res) {
+      if (checkErr(res)) return;
+      state.daily_tasks = res.data || [];
+    });
+}
 function fetchPoems() {
   return sb.from('poems').select('*')
     .order('position', { ascending: true }).order('created_at', { ascending: true })
@@ -175,6 +184,7 @@ function loadAll(handlers) {
   if (!handlers || handlers.playlist_tracks) jobs.push(fetchPlaylistTracks());
   if (!handlers || handlers.poetry_books) jobs.push(fetchPoetryBooks());
   if (!handlers || handlers.poems) jobs.push(fetchPoems());
+  if (!handlers || handlers.daily_tasks) jobs.push(fetchDailyTasks());
   return Promise.all(jobs).then(function () {
     if (handlers) Object.keys(handlers).forEach(function (k) { handlers[k](); });
   }).catch(function () { showSyncError(true); });
@@ -186,7 +196,7 @@ function subscribeRealtime(handlers) {
   var ch = sb.channel('couples-live-' + location.pathname);
   Object.keys(handlers).forEach(function (table) {
     ch.on('postgres_changes', { event: '*', schema: 'public', table: table }, function () {
-      var fetcher = { profiles: fetchProfiles, projects: fetchProjects, messages: fetchMessages, files: fetchFiles, playlists: fetchPlaylists, playlist_tracks: fetchPlaylistTracks, poetry_books: fetchPoetryBooks, poems: fetchPoems }[table];
+      var fetcher = { profiles: fetchProfiles, projects: fetchProjects, messages: fetchMessages, files: fetchFiles, playlists: fetchPlaylists, playlist_tracks: fetchPlaylistTracks, poetry_books: fetchPoetryBooks, poems: fetchPoems, daily_tasks: fetchDailyTasks }[table];
       if (fetcher) fetcher().then(function () { handlers[table](); });
     });
   });

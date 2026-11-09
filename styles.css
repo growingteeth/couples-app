@@ -422,3 +422,43 @@ a{color:#2f5d3a}
 .poem-editor textarea{min-height:220px;line-height:1.55;font-family:Georgia,"Times New Roman",serif;font-size:15px}
 .open-book-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;margin-bottom:4px}
 .open-book-title{font-family:"Archivo Black",sans-serif;font-size:24px;color:var(--forest);line-height:1.15}
+
+/* ================= V7: DAILY TASKS + POMODORO ================= */
+.day-bar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
+.day-bar input[type="date"]{padding:6px 7px;border:1.5px solid #6d7261;border-radius:5px;background:#fffef7;font:inherit}
+.day-label{font-family:"Archivo Black",sans-serif;font-size:16px;color:var(--forest)}
+.day-counts{font-family:"Space Mono",monospace;font-size:12px;color:var(--ink-soft)}
+.day-filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
+.filter-label{font-family:"Space Mono",monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+.filter-btn.is-on{background:linear-gradient(180deg,#3d6547,var(--forest));color:var(--lime2);border-color:#0e1f14}
+.hide-done{font-size:13px;font-weight:700;display:flex;gap:5px;align-items:center;margin-left:4px}
+.task-sec-head{font-family:"Archivo Black",sans-serif;font-size:18px;color:var(--forest);margin:14px 0 8px}
+.task-list{display:grid;gap:8px}
+.task-card{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start;background:var(--paper);border:1.5px solid #20241c;border-radius:9px;padding:10px;box-shadow:2px 2px 0 rgba(32,36,28,.22)}
+.task-card.done{opacity:.62}
+.task-card.done .task-title{text-decoration:line-through}
+.task-check input{position:absolute;opacity:0;width:1px;height:1px}
+.task-check span{width:26px;height:26px;display:grid;place-items:center;border:2px solid #20241c;border-radius:6px;background:#fffef7;cursor:pointer;font-size:16px;color:var(--forest);box-shadow:inset 1px 1px 0 rgba(90,95,70,.25)}
+.task-check input:checked + span{background:var(--lime);color:var(--forest)}
+.task-check input:checked + span::after{content:"✓";font-weight:900}
+.task-check input:focus-visible + span{outline:3px solid var(--pink)}
+.task-title{font-weight:700;font-size:15px}
+.task-main p{margin:4px 0 0;font-size:13px;color:var(--ink-soft);white-space:pre-wrap}
+.pill.pomo-pill{background:#ffe3f0;color:#7c1747}
+.task-actions{display:flex;flex-direction:column;gap:5px}
+@media(max-width:560px){.task-card{grid-template-columns:auto 1fr}.task-actions{grid-column:1/-1;flex-direction:row;flex-wrap:wrap}}
+/* Pomodoro floating window */
+.pomo{position:fixed;right:16px;bottom:62px;width:300px;max-width:calc(100vw - 24px);z-index:90;background:linear-gradient(180deg,#d8d9c4,#c6c8ae);border:2px solid #20241c;border-radius:14px;box-shadow:6px 6px 0 rgba(0,0,0,.4);overflow:hidden}
+.pomo-bar{background:linear-gradient(180deg,#7d9a80,var(--sage) 55%,#57755c);color:#fff;padding:7px 8px 7px 12px;display:flex;justify-content:space-between;align-items:center;cursor:move;user-select:none;touch-action:none;border-bottom:2px solid #20241c;text-shadow:0 1px 2px rgba(0,0,0,.45);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.pomo-bar-btns{display:flex;gap:5px}
+.pomo-bar-btns button{width:24px;height:24px;border-radius:50%;background:var(--metal);border:1.5px solid #20241c;font-weight:900;color:#232a21;cursor:pointer}
+.pomo-body{padding:12px;background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.pomo-task{font-size:13px;margin-bottom:6px}
+.pomo-clock{font-family:"Space Mono",monospace;font-weight:700;font-size:52px;text-align:center;color:var(--lime2);background:linear-gradient(180deg,#2c4a34,var(--forest2));border:2px solid #10150f;border-radius:10px;padding:6px 4px;box-shadow:inset 0 0 18px rgba(0,0,0,.6);letter-spacing:.04em}
+.pomo-progress{height:10px;border:2px solid #20241c;border-radius:99px;background:#fffef7;margin:10px 0;overflow:hidden}
+.pomo-progress div{height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--lime));transition:width .5s linear}
+.pomo-modes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:9px}
+.pomo-mode.is-on{background:linear-gradient(180deg,#3d6547,var(--forest));color:var(--lime2);border-color:#0e1f14}
+.pomo-controls{display:flex;gap:7px;justify-content:center}
+.pomo-meta{text-align:center;font-family:"Space Mono",monospace;font-size:11.5px;color:var(--ink-soft);margin-top:9px}
+.pomo-mini{position:fixed;right:14px;bottom:62px;z-index:90;border:2px solid #8f1454;border-radius:999px;background:var(--pink);color:#fff;font-weight:900;font-family:"Space Mono",monospace;padding:9px 14px;box-shadow:3px 3px 0 rgba(0,0,0,.4);cursor:pointer}
